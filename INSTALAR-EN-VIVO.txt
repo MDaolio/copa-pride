@@ -23,10 +23,15 @@ RESULTADOS EN VIVO - PASO A PASO (se hace una sola vez, 10 minutos)
 
 CADA DÍA DE JORNADA
 -------------------
-- Menú "Copa Pride" > "Abrir jornada de hoy". Te muestra UN PIN POR PARTIDO (6 números cada uno)
-  y los anota en la hoja "PINs" (hora, cancha, encuentro, PIN y quién lo tomó).
+- Menú "Copa Pride" > "Abrir jornada de hoy". Muestra:
+    * UN PIN POR PARTIDO (6 números). Cada uno vale solo para SU partido, desde 30 minutos antes
+      de la hora hasta 90 minutos después, y SE ANULA cuando el veedor finaliza el partido.
+    * UN PIN DE ADMINISTRACIÓN (solo para la organización): entra a todos los partidos, sin horario,
+      y puede reabrir partidos finalizados para corregirlos.
+  Todo queda anotado en la hoja "PINs" (hora, cancha, encuentro, PIN, veedor, horario y estado).
 - A cada veedor pasale SOLO el PIN de su partido, junto con el link a veedor.html.
-  Con ese PIN solo puede cargar ESE partido (no puede entrar a los demás).
+- Para probar fuera de horario: "Copa Pride" > "Abrir jornada de PRUEBA (PINs sin horario)":
+  los PINs duran 4 horas desde ese momento.
 - Los PINs solo sirven HOY y hasta las 23:30. Después se cierran solos.
 - Si un PIN se filtra o termina todo antes: "Copa Pride" > "Cerrar jornada" (todos los PINs se anulan al instante).
 - Si hoy no hay partidos en el fixture (por ejemplo para una prueba), el menú te pide una fecha
@@ -39,9 +44,12 @@ COMO USAN LA PANTALLA LOS VEEDORES
   celular o compu, la pantalla pregunta si lo quiere tomar; si acepta, el primero deja de poder cargar.
   (Si el celu se quedó sin batería: se toma desde otro. Si no, se libera solo a los 25 min sin usar.)
 - GOL / Amarilla / Roja / Azul -> eligen jugador. Todo se guarda solo, con cada toque.
+- Si refrescan la página en medio del partido, vuelven directo a él: lo cargado ya está guardado.
 - Playoff empatado: cargan penales.
-- "Finalizar partido" confirma el resultado (no necesita aprobación tuya). Si se equivocan: "Reabrir para corregir".
-- Si se cae el internet, la pantalla reintenta sola y no pierde lo cargado (no cerrar la página).
+- "Finalizar partido" confirma el resultado y ANULA el PIN. Para corregir algo después, hay que pedirle
+  a la organización, que entra con el PIN de administración y usa "Reabrir para corregir".
+- Si se cae el internet, la pantalla reintenta sola cada 4 segundos y guarda lo cargado en el celular
+  (no cerrar la página). Apenas vuelve la señal, se sube todo.
 
 QUE VE EL PUBLICO
 -----------------

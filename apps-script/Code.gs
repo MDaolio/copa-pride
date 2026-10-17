@@ -10,6 +10,10 @@
  *  - Para ESCRIBIR hace falta un PIN. Cada PARTIDO tiene su propio PIN: lo genera
  *    el menú "Copa Pride -> Abrir jornada de hoy" y queda anotado en la hoja "PINs".
  *    Con el PIN de un partido solo se puede cargar ESE partido.
+ *  - El PIN de un partido solo vale en su horario (30 min antes hasta 90 min después)
+ *    y MUERE cuando el veedor finaliza el partido.
+ *  - Hay un PIN de ADMINISTRACIÓN (fila "ADMIN" de la hoja "PINs"): entra a todos los
+ *    partidos, sin horario, y puede reabrir partidos finalizados para corregirlos.
  *  - Un partido solo lo puede tener un dispositivo a la vez (si otro quiere tomarlo,
  *    la pantalla le pregunta y el primero deja de poder cargar).
  *  - Los PINs sirven solo hoy y se anulan al cerrar la jornada o a la medianoche.
@@ -21,6 +25,10 @@ var HOJA_CONFIG = "Config";
 var HOJA_PINS = "PINs";
 var COLUMNAS = ["id", "estado", "golesLocal", "golesVisitante", "penLocal", "penVisitante",
                 "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp"];
+var MIN_ANTES = 30;           // el PIN de un partido se activa tantos minutos antes de su hora
+var MIN_DESPUES = 90;         // y vence tantos minutos después de su hora de inicio
+var MIN_PRUEBA = 240;         // duración de los PINs en una jornada de PRUEBA
+var COLS_PIN = 10;            // columnas de la hoja PINs
 var MINUTOS_BLOQUEO = 25;      // un partido tomado por un veedor queda reservado este tiempo
 var HORA_CIERRE_DEFAULT = "23:30";
 
@@ -78,12 +86,27 @@ function hora_() { return Utilities.formatDate(ahora_(), ZONA_HORARIA, "HH:mm");
 function onOpen() {
   SpreadsheetApp.getUi().createMenu("Copa Pride")
     .addItem("Abrir jornada de hoy", "abrirJornada")
+    .addItem("Abrir jornada de PRUEBA (PINs sin horario)", "abrirJornadaPrueba")
     .addItem("Cerrar jornada", "cerrarJornada")
     .addItem("Liberar todos los partidos", "liberarBloqueos")
     .addToUi();
 }
 
-function abrirJornada() {
+function pinNuevo_(usados) {
+  var pin;
+  do { pin = String(100000 + Math.floor(Math.random() * 900000)); } while (usados[pin]);
+  usados[pin] = true;
+  return pin;
+}
+
+function fmtFechaHora_(ms) { return Utilities.formatDate(new Date(ms), ZONA_HORARIA, "yyyy-MM-dd HH:mm"); }
+function aMs_(txt) { return Date.parse(String(txt).trim().replace(" ", "T") + ":00-03:00"); }   // Argentina: UTC-3 todo el año
+function horaDe_(txt) { return String(txt).trim().substring(11, 16); }
+
+function abrirJornada() { abrir_(false); }
+function abrirJornadaPrueba() { abrir_(true); }
+
+function abrir_(prueba) {
   var ui = SpreadsheetApp.getUi();
   prepararHojas_();
   var fecha = hoy_();
@@ -98,23 +121,27 @@ function abrirJornada() {
     if (!ps.length) { ui.alert("Sin partidos", "No encontré partidos para " + fecha + ".", ui.ButtonSet.OK); return; }
   }
   ps = ps.slice().sort(function (a, b) { return (a[2] + a[3]).localeCompare(b[2] + b[3]); });
-  var usados = {}, filas = [], texto = [];
+  var usados = {}, ahoraMs = ahora_().getTime();
+  var pinAdmin = pinNuevo_(usados);
+  var filas = [["*", fecha, "", "", "ADMIN · todos los partidos (sin horario)", pinAdmin, "", "", "", ""]];
+  var texto = [];
   ps.forEach(function (f) {
-    var pin;
-    do { pin = String(100000 + Math.floor(Math.random() * 900000)); } while (usados[pin]);
-    usados[pin] = true;
-    filas.push([f[0], f[1], f[2], f[3], f[4], pin, ""]);
-    texto.push(f[2] + " · " + f[3] + " · " + f[4] + "  →  PIN " + pin);
+    var pin = pinNuevo_(usados), desde, hasta;
+    if (prueba) { desde = ahoraMs; hasta = ahoraMs + MIN_PRUEBA * 60000; }
+    else { var ini = aMs_(f[1] + " " + f[2]); desde = ini - MIN_ANTES * 60000; hasta = ini + MIN_DESPUES * 60000; }
+    filas.push([f[0], f[1], f[2], f[3], f[4], pin, "", fmtFechaHora_(desde), fmtFechaHora_(hasta), ""]);
+    texto.push(f[2] + " · " + f[3] + " · " + f[4] + "  →  PIN " + pin + "  (activo " + horaDe_(fmtFechaHora_(desde)) + " a " + horaDe_(fmtFechaHora_(hasta)) + ")");
   });
   var hp = hoja_(HOJA_PINS);
-  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, 7).clearContent();
-  hp.getRange(2, 1, filas.length, 7).setNumberFormat("@").setValues(filas);
+  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, COLS_PIN).clearContent();
+  hp.getRange(2, 1, filas.length, COLS_PIN).setNumberFormat("@").setValues(filas);
   escribirConfig_({ pin: "", fecha: hoy_(), abierta: "SI" });
   limpiarCache_();
-  ui.alert("Jornada abierta",
-    "Un PIN por partido (también quedan en la hoja \"PINs\"):\n\n" + texto.join("\n") +
-    "\n\nPasale a cada veedor SOLO el PIN de su partido. Sirven hoy hasta las " +
-    (leerConfig_().horaCierre || HORA_CIERRE_DEFAULT) + " y se anulan al cerrar la jornada.",
+  ui.alert(prueba ? "Jornada de PRUEBA abierta" : "Jornada abierta",
+    "PIN DE ADMINISTRACIÓN (solo para vos, entra a todos los partidos y puede corregir): " + pinAdmin +
+    "\n\nUn PIN por partido (también están en la hoja \"PINs\"):\n\n" + texto.join("\n") +
+    "\n\nCada PIN vale solo para su partido y se anula cuando el veedor lo finaliza." +
+    (prueba ? "\nEsta es una jornada de PRUEBA: los PINs duran " + (MIN_PRUEBA / 60) + " horas desde ahora." : ""),
     ui.ButtonSet.OK);
 }
 
@@ -122,7 +149,7 @@ function cerrarJornada() {
   prepararHojas_();
   escribirConfig_({ pin: "", abierta: "NO" });
   var hp = hoja_(HOJA_PINS);
-  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, 7).clearContent();
+  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, COLS_PIN).clearContent();
   limpiarCache_();
   SpreadsheetApp.getUi().alert("Jornada cerrada",
     "Los veedores ya no pueden cargar resultados. Todos los PINs quedaron anulados.",
@@ -151,7 +178,7 @@ function prepararHojas_() {
   if (hp.getLastRow() < 1) hp.appendRow(COLUMNAS);
   else hp.getRange(1, 1, 1, COLUMNAS.length).setValues([COLUMNAS]);
   var hpin = hoja_(HOJA_PINS);
-  if (hpin.getLastRow() < 1) hpin.appendRow(["partido", "fecha", "hora", "cancha", "encuentro", "PIN", "veedor"]);
+  if (hpin.getLastRow() < 1) hpin.appendRow(["partido", "fecha", "hora", "cancha", "encuentro", "PIN", "veedor", "activo desde", "activo hasta", "estado"]);
   var hc = hoja_(HOJA_CONFIG);
   if (hc.getLastRow() < 1) {
     hc.appendRow(["pin", ""]);
@@ -222,12 +249,22 @@ function buscarPin_(pin) {
   var hp = hoja_(HOJA_PINS);
   var n = hp.getLastRow();
   if (n < 2) return null;
-  var vals = hp.getRange(2, 1, n - 1, 7).getValues();
+  var vals = hp.getRange(2, 1, n - 1, COLS_PIN).getValues();
   for (var i = 0; i < vals.length; i++) {
     var p = String(vals[i][5]).trim();
-    if (p && p === pin) return { partido: String(vals[i][0]), encuentro: String(vals[i][4]), fila: i + 2 };
+    if (p && p === pin)
+      return { partido: String(vals[i][0]), fecha: String(vals[i][1]), encuentro: String(vals[i][4]), fila: i + 2,
+               desde: String(vals[i][7] || ""), hasta: String(vals[i][8] || ""), estado: String(vals[i][9] || "") };
   }
   return null;
+}
+
+function filaPin_(partido) {
+  var hp = hoja_(HOJA_PINS), n = hp.getLastRow();
+  if (n < 2) return 0;
+  var vals = hp.getRange(2, 1, n - 1, 1).getValues();
+  for (var i = 0; i < vals.length; i++) if (String(vals[i][0]) === String(partido)) return i + 2;
+  return 0;
 }
 
 function validar_(pin) {
@@ -244,7 +281,21 @@ function validar_(pin) {
     Utilities.sleep(1200);   // frena los intentos de adivinar el PIN
     return { ok: false, codigo: "pin", error: "PIN incorrecto." };
   }
-  return { ok: true, partido: hit.partido, encuentro: hit.encuentro, fila: hit.fila };
+  if (hit.partido === "*")
+    return { ok: true, admin: true, partido: "*", fecha: hit.fecha, encuentro: hit.encuentro, fila: hit.fila };
+  if (hit.estado === "FINALIZADO")
+    return { ok: false, codigo: "pin", error: "Este PIN ya se usó: el partido está finalizado. Si hay que corregir algo, avisale a la organización." };
+  var t = ahora_().getTime();
+  if (hit.desde && t < aMs_(hit.desde))
+    return { ok: false, codigo: "pin", error: "Todavía no es el horario de tu partido. Tu PIN se activa a las " + horaDe_(hit.desde) + "." };
+  if (hit.hasta && t > aMs_(hit.hasta))
+    return { ok: false, codigo: "pin", error: "El PIN de tu partido venció a las " + horaDe_(hit.hasta) + ". Avisale a la organización." };
+  return { ok: true, partido: hit.partido, fecha: hit.fecha, encuentro: hit.encuentro, fila: hit.fila };
+}
+
+function permitido_(v, id) {
+  if (v.admin) return FIXTURE.some(function (f) { return f[0] === id; });
+  return id === v.partido;
 }
 
 function nombreVeedor_(v) {
@@ -276,7 +327,7 @@ function estadoJson_() {
 /* ---------------- escritura (solo veedores con PIN) ---------------- */
 function login_(d, v) {
   if (!nombreVeedor_(d.veedor)) return err_("Poné tu nombre.");
-  return { ok: true, fecha: hoy_(), partido: v.partido, encuentro: v.encuentro };
+  return { ok: true, fecha: hoy_(), partido: v.partido, encuentro: v.encuentro, admin: !!v.admin, fechaPartidos: v.fecha };
 }
 
 function dispValido_(x) { return /^[A-Za-z0-9_-]{8,40}$/.test(String(x || "")); }
@@ -284,7 +335,7 @@ function dispValido_(x) { return /^[A-Za-z0-9_-]{8,40}$/.test(String(x || "")); 
 function tomar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
   if (!/^[A-Za-z0-9_-]{1,20}$/.test(id)) return err_("Partido inválido.");
-  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
+  if (!permitido_(v, id)) return err_("Ese PIN es de otro partido.", "partido");
   if (!nombre) return err_("Poné tu nombre.");
   if (!dispValido_(d.disp)) return err_("Recargá la página e intentá de nuevo.");
   var mapa = leerPartidos_(), r = mapa[id] || { id: id }, ts = ahora_().getTime();
@@ -294,7 +345,8 @@ function tomar_(d, v) {
     return { ok: false, ocupado: true, por: r.veedor, codigo: "ocupado", error: "Lo está cargando otro dispositivo (" + r.veedor + ")." };
   r.veedor = nombre;
   r.disp = String(d.disp);
-  if (v.fila) hoja_(HOJA_PINS).getRange(v.fila, 7).setValue(nombre);
+  var fp = v.admin ? filaPin_(id) : v.fila;
+  if (fp) hoja_(HOJA_PINS).getRange(fp, 7).setValue(v.admin ? nombre + " (admin)" : nombre);
   if (/^e\d{1,3}$/.test(String(d.veedorEq || ""))) r.veedorEq = String(d.veedorEq);
   r.lockHasta = ts + MINUTOS_BLOQUEO * 60000;
   if (!r.estado) {
@@ -329,7 +381,7 @@ function listaValida_(lista, max, conTipo) {
 
 function guardar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
-  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
+  if (!permitido_(v, id)) return err_("Ese PIN es de otro partido.", "partido");
   var estado = d.estado;
   if (estado !== "EN_JUEGO" && estado !== "FINAL") return err_("Estado inválido.");
   var gl = entero_(d.gl, 99), gv = entero_(d.gv, 99);
@@ -350,13 +402,16 @@ function guardar_(d, v) {
   r.lockHasta = estado === "FINAL" ? 0 : ahora_().getTime() + MINUTOS_BLOQUEO * 60000;
   r.actualizado = ahora_().toISOString();
   escribirFila_(r, r._fila);
+  // Al finalizar, el PIN de ese partido muere: el veedor ya no puede volver a entrar.
+  // Solo la administración (PIN ADMIN) puede reabrirlo para corregir.
+  if (estado === "FINAL") { var fp = filaPin_(id); if (fp) hoja_(HOJA_PINS).getRange(fp, 10).setValue("FINALIZADO"); }
   limpiarCache_();
   return { ok: true, partido: publico_(r) };
 }
 
 function liberar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
-  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
+  if (!permitido_(v, id)) return err_("Ese PIN es de otro partido.", "partido");
   var mapa = leerPartidos_(), r = mapa[id];
   if (r && (r.disp ? String(r.disp) === String(d.disp) : r.veedor === nombre)) { r.lockHasta = 0; escribirFila_(r, r._fila); limpiarCache_(); }
   return { ok: true };

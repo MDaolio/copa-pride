@@ -1,8 +1,9 @@
 /* =====================================================================
    PANTALLA DE VEEDORES · Copa Pride
-   Cada veedor entra con el PIN de SU partido (uno por partido) y carga
-   goles, tarjetas y penales desde el celular. Todo se guarda solo.
-   Un partido solo lo puede tener un dispositivo a la vez.
+   Cada veedor entra con el PIN de SU partido (uno por partido, solo vale en su
+   horario y muere al finalizar) y carga goles, tarjetas y penales desde el celular.
+   Todo se guarda solo. Un partido solo lo puede tener un dispositivo a la vez.
+   El PIN de ADMINISTRACIÓN entra a todos los partidos y puede reabrir los finalizados.
    ===================================================================== */
 (function () {
   "use strict";
@@ -35,7 +36,7 @@
     return d;
   }
 
-  const S = { nombre: ls.get("cp_nombre") || "", eq: ls.get("cp_equipo") || "", pin: ls.get("cp_pin") || "", disp: idDispositivo(), partido: ls.get("cp_partido") || "", remoto: {}, timerLista: null, aviso: "" };
+  const S = { nombre: ls.get("cp_nombre") || "", eq: ls.get("cp_equipo") || "", pin: ls.get("cp_pin") || "", disp: idDispositivo(), partido: ls.get("cp_partido") || "", admin: false, fechaP: "", remoto: {}, timerLista: null, aviso: "" };
   let M = null;                 // partido que se está cargando
   let enviando = false, pendiente = false;
   let wake = null;
@@ -59,7 +60,7 @@
   // Devuelve true si el servidor dijo que la jornada/PIN ya no valen: se vuelve al login.
   function sesionCaida(r) {
     if (r && !r.ok && ["pin", "cerrada", "fecha", "hora"].indexOf(r.codigo) >= 0) {
-      S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido");
+      S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); S.admin = false;
       S.aviso = r.error || "Tenés que volver a entrar.";
       detenerLista();
       pantallaLogin();
@@ -73,7 +74,7 @@
     const q = document.getElementById("vQuien");
     q.hidden = !S.pin;
     const eqq = S.eq ? A.equipo(S.eq) : null;
-    document.getElementById("vNombre").textContent = S.nombre + (eqq ? " (" + eqq.nombre + ")" : "");
+    document.getElementById("vNombre").textContent = S.nombre + (S.admin ? " · ADMIN" : eqq ? " (" + eqq.nombre + ")" : "");
     document.getElementById("vSub").textContent = (D.nombre || "") + " " + (D.edicion || "");
   }
 
@@ -87,7 +88,7 @@
     pintarQuien();
     root.innerHTML = `<form class="vcaja" id="fLogin" autocomplete="off">
       <h2>Entrar como veedor</h2>
-      <p class="vtxt">El PIN es de tu partido: te lo pasa la organización el día de la jornada. Solo sirve para ese partido y ese día.</p>
+      <p class="vtxt">El PIN es de tu partido: te lo pasa la organización el día de la jornada. Solo sirve para ese partido, en su horario, y se vence cuando lo finalizás.</p>
       ${S.aviso ? `<p class="vaviso">${esc(S.aviso)}</p>` : ""}
       <label>Tu nombre<input id="iNombre" type="text" maxlength="30" value="${esc(S.nombre)}" placeholder="Ej: Nacho" list="lVeedores" required></label>
       <datalist id="lVeedores">${(D.veedores || []).map((x) => `<option value="${esc(x.nombre)}"></option>`).join("")}</datalist>
@@ -113,7 +114,7 @@
         S.nombre = nombre; S.pin = pin;
         const r = await llamar("login");
         if (r.ok) {
-          S.partido = r.partido || "";
+          S.partido = r.partido || ""; S.admin = !!r.admin; S.fechaP = r.fechaPartidos || "";
           ls.set("cp_nombre", S.nombre); ls.set("cp_equipo", S.eq); ls.set("cp_pin", S.pin); ls.set("cp_partido", S.partido);
           await abrirLista(); return;
         }
@@ -131,36 +132,63 @@
 
   function detenerLista() { if (S.timerLista) { clearInterval(S.timerLista); S.timerLista = null; } }
 
-  // Con un PIN por partido, "la lista" es una sola tarjeta: el partido de este veedor.
+  // Veedor: "la lista" es una sola tarjeta (su partido). Administración: todos los partidos del día.
   async function abrirLista() {
     M = null;
     pintarQuien();
     detenerLista();
     try { await cargarEstado(); } catch (e) { /* se muestra lo que haya */ }
     pintarLista();
+    if (S.admin) {
+      S.timerLista = setInterval(async () => {
+        if (document.hidden || M) return;
+        try { await cargarEstado(); pintarLista(); } catch (e) { /* sin conexión */ }
+      }, 8000);
+    }
   }
 
   function chipEstado(p) {
     const x = S.remoto[p.id];
-    if (!x || !x.estado) return { clase: "libre", txt: "Todavía no empezó" };
+    if (!x || !x.estado) return { clase: "libre", txt: S.admin ? "Libre" : "Todavía no empezó" };
     const marc = `${x.gl}-${x.gv}`;
     if (x.estado === "FINAL") return { clase: "final", txt: "Final " + marc };
-    return { clase: "mio", txt: "En juego " + marc };
+    if (!S.admin) return { clase: "mio", txt: "En juego " + marc };
+    if (x.lock) return { clase: "ocupado", txt: "En carga: " + esc(x.veedor) + " · " + marc };
+    return { clase: "libre", txt: "En juego " + marc + " · libre" };
+  }
+
+  function tarjetaPartido(p) {
+    const listo = A.equipo(p.local) && A.equipo(p.visitante);
+    const c = chipEstado(p);
+    const cerrado = !S.admin && c.clase === "final";   // el veedor no vuelve a entrar a un partido finalizado
+    return `<button type="button" class="vp ${c.clase}" data-act="abrir" data-id="${esc(p.id)}" ${listo && !cerrado ? "" : "disabled"}>
+      <span class="vp-top"><span>${esc(p.hora)} · ${esc(p.cancha)} · ${esc(A.faseLabel(p))}</span><span class="vp-est">${listo ? c.txt : "Equipos por definir"}</span></span>
+      <span class="vp-eq">${equiposTxt(p)}</span></button>`;
   }
 
   function pintarLista() {
-    const p = A.partidos().find((x) => x.id === S.partido);
-    let html = `<h2 class="vtit">Tu partido</h2>`;
-    if (!p) {
-      html += `<div class="vcaja"><p>Este PIN es de un partido que no está en la lista. Avisale a la organización.</p></div>`;
-    } else if (!A.equipo(p.local) || !A.equipo(p.visitante)) {
-      html += `<div class="vcaja"><p>Los equipos de este partido todavía no están definidos. Avisale a la organización.</p></div>`;
+    let html;
+    if (S.admin) {
+      const dia = S.fechaP;
+      const ps = A.partidos().filter((p) => p.fecha === dia)
+        .sort((a, b) => (a.hora + a.cancha).localeCompare(b.hora + b.cancha, "es", { numeric: true }));
+      html = `<h2 class="vtit">Administración</h2><p class="vtxt">${dia ? esc(A.fechaLarga(dia)) + ". " : ""}Podés abrir cualquier partido, también los finalizados, para corregirlos.</p>`;
+      if (!ps.length) html += `<div class="vcaja"><p>No hay partidos para esa fecha.</p></div>`;
+      [...new Set(ps.map((p) => p.hora))].forEach((h) => {
+        html += `<h3 class="vhora">${esc(h)}</h3><div class="vlista">${ps.filter((p) => p.hora === h).map(tarjetaPartido).join("")}</div>`;
+      });
     } else {
-      const c = chipEstado(p);
-      html += `<p class="vtxt">${esc(A.fechaLarga(p.fecha))}. Tocá el partido para cargarlo.</p>
-        <div class="vlista"><button type="button" class="vp ${c.clase}" data-act="abrir" data-id="${esc(p.id)}">
-          <span class="vp-top"><span>${esc(p.hora)} · ${esc(p.cancha)} · ${esc(A.faseLabel(p))}</span><span class="vp-est">${c.txt}</span></span>
-          <span class="vp-eq">${equiposTxt(p)}</span></button></div>`;
+      const p = A.partidos().find((x) => x.id === S.partido);
+      html = `<h2 class="vtit">Tu partido</h2>`;
+      if (!p) {
+        html += `<div class="vcaja"><p>Este PIN es de un partido que no está en la lista. Avisale a la organización.</p></div>`;
+      } else if (!A.equipo(p.local) || !A.equipo(p.visitante)) {
+        html += `<div class="vcaja"><p>Los equipos de este partido todavía no están definidos. Avisale a la organización.</p></div>`;
+      } else {
+        const fin = chipEstado(p).clase === "final";
+        html += `<p class="vtxt">${esc(A.fechaLarga(p.fecha))}. ${fin ? "Este partido ya está finalizado. Si hay que corregir algo, avisale a la organización." : "Tocá el partido para cargarlo."}</p>
+          <div class="vlista">${tarjetaPartido(p)}</div>`;
+      }
     }
     root.innerHTML = html;
   }
@@ -272,8 +300,9 @@
       <section class="vcaja"><h3>Qué pasó</h3><ul class="vev">${eventos()}</ul></section>
       <div class="vfin">
         ${final
-          ? `<button type="button" class="vbtn grande" data-act="reabrir">Reabrir para corregir</button>
-             <button type="button" class="vbtn grande sec" data-act="lista">Volver al inicio</button>`
+          ? (S.admin ? `<button type="button" class="vbtn grande" data-act="reabrir">Reabrir para corregir</button>`
+              : `<p class="vtxt">Tu PIN ya se usó: el partido quedó cerrado. Si hay que corregir algo, avisale a la organización.</p>`) +
+            `<button type="button" class="vbtn grande sec" data-act="lista">Volver al inicio</button>`
           : `<button type="button" class="vbtn grande fin" data-act="finalizar">Finalizar partido</button>
              <button type="button" class="vbtn sec" data-act="soltar">Soltar el partido sin finalizar</button>`}
       </div>`;
@@ -387,7 +416,7 @@
       return cambio();
     }
     if (a === "finalizar") return finalizar();
-    if (a === "reabrir") { M.estado = "EN_JUEGO"; return cambio(); }
+    if (a === "reabrir") { if (!S.admin) return; M.estado = "EN_JUEGO"; return cambio(); }
     if (a === "lista") return volverALista(false);
     if (a === "soltar") { if (confirm("¿Soltar el partido? Otro dispositivo lo va a poder tomar.")) return volverALista(true); }
   });
@@ -396,7 +425,7 @@
     const b = ev.target.closest('[data-act="salir"]');
     if (!b) return;
     if (!confirm("¿Salir? Vas a tener que volver a poner el PIN.")) return;
-    S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); detenerLista(); soltarPantalla(); M = null; pintarQuien(); pantallaLogin();
+    S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); S.admin = false; detenerLista(); soltarPantalla(); M = null; pintarQuien(); pantallaLogin();
   });
 
   /* ---------------- arranque ---------------- */
@@ -409,11 +438,14 @@
       try {
         const r = await llamar("login");
         if (r.ok) {
-          S.partido = r.partido || ""; ls.set("cp_partido", S.partido);
+          S.partido = r.partido || ""; S.admin = !!r.admin; S.fechaP = r.fechaPartidos || ""; ls.set("cp_partido", S.partido);
           await abrirLista();
+          // Si se refrescó la página en medio de un partido, vuelve directo al partido (lo cargado ya está en la planilla).
+          const x = S.remoto[S.partido];
+          if (!S.admin && x && x.estado === "EN_JUEGO") await abrirPartido(S.partido);
           return;
         }
-        S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); S.aviso = r.error || "";
+        S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); S.admin = false; S.aviso = r.error || "";
       } catch (e) { S.aviso = "No hay conexión para verificar tu PIN."; }
     }
     pantallaLogin();
