@@ -1,0 +1,5 @@
+# Que el celu siempre baje la versión más nueva de la página (nada de versiones viejas guardadas)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
