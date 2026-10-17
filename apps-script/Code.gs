@@ -7,18 +7,67 @@
  * Cómo funciona:
  *  - La planilla guarda los resultados que cargan los veedores desde el celular.
  *  - La página pública lee esos resultados (lectura abierta, solo muestra datos).
- *  - Para ESCRIBIR hace falta el PIN de la jornada. El PIN lo genera el menú
- *    "Copa Pride -> Abrir jornada de hoy", sirve solo el día de hoy y se anula
- *    al cerrar la jornada o a la medianoche.
+ *  - Para ESCRIBIR hace falta un PIN. Cada PARTIDO tiene su propio PIN: lo genera
+ *    el menú "Copa Pride -> Abrir jornada de hoy" y queda anotado en la hoja "PINs".
+ *    Con el PIN de un partido solo se puede cargar ESE partido.
+ *  - Un partido solo lo puede tener un dispositivo a la vez (si otro quiere tomarlo,
+ *    la pantalla le pregunta y el primero deja de poder cargar).
+ *  - Los PINs sirven solo hoy y se anulan al cerrar la jornada o a la medianoche.
  */
 
 var ZONA_HORARIA = "America/Argentina/Buenos_Aires";
 var HOJA_PARTIDOS = "Partidos";
 var HOJA_CONFIG = "Config";
+var HOJA_PINS = "PINs";
 var COLUMNAS = ["id", "estado", "golesLocal", "golesVisitante", "penLocal", "penVisitante",
-                "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq"];
+                "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp"];
 var MINUTOS_BLOQUEO = 25;      // un partido tomado por un veedor queda reservado este tiempo
 var HORA_CIERRE_DEFAULT = "23:30";
+
+/* Fixture (id, fecha, hora, cancha, encuentro). Sale de data.js; si cambian fechas u horarios de los playoffs, se vuelve a pegar. */
+var FIXTURE = [
+  ["m1", "2026-10-17", "14:00", "Cancha 1", "Zona C · Red Aguará vs Impulse"],
+  ["m2", "2026-10-17", "14:00", "Cancha 2", "Zona D · Panteras FC vs Apex Aguará"],
+  ["m3", "2026-10-17", "14:00", "Cancha 3", "Zona D · Cruzados vs Tigres"],
+  ["m4", "2026-10-17", "15:00", "Cancha 1", "Zona B · DOGOS F5 vs Fenix"],
+  ["m5", "2026-10-17", "15:00", "Cancha 2", "Zona B · FGR vs Grindr"],
+  ["m6", "2026-10-17", "15:00", "Cancha 3", "Zona A · Panteras KFC vs Crisol"],
+  ["m7", "2026-10-17", "16:00", "Cancha 1", "Zona C · Yacares BA vs Huemules"],
+  ["m8", "2026-10-17", "16:00", "Cancha 3", "Zona A · Aguará Guazú vs Escorpiones"],
+  ["m9", "2026-10-24", "14:00", "Cancha 1", "Zona A · Aguará Guazú vs Crisol"],
+  ["m10", "2026-10-24", "14:00", "Cancha 2", "Zona A · Panteras KFC vs Escorpiones"],
+  ["m11", "2026-10-24", "14:00", "Cancha 3", "Zona B · DOGOS F5 vs Grindr"],
+  ["m12", "2026-10-24", "15:00", "Cancha 1", "Zona D · Panteras FC vs Tigres"],
+  ["m13", "2026-10-24", "15:00", "Cancha 2", "Zona C · Yacares BA vs Impulse"],
+  ["m14", "2026-10-24", "15:00", "Cancha 3", "Zona C · Red Aguará vs Huemules"],
+  ["m15", "2026-10-24", "16:00", "Cancha 1", "Zona D · Cruzados vs Apex Aguará"],
+  ["m16", "2026-10-24", "16:00", "Cancha 3", "Zona B · FGR vs Fenix"],
+  ["m17", "2026-10-31", "14:00", "Cancha 1", "Zona B · Grindr vs Fenix"],
+  ["m18", "2026-10-31", "14:00", "Cancha 2", "Zona B · DOGOS F5 vs FGR"],
+  ["m19", "2026-10-31", "14:00", "Cancha 3", "Zona C · Red Aguará vs Yacares BA"],
+  ["m20", "2026-10-31", "15:00", "Cancha 1", "Zona A · Crisol vs Escorpiones"],
+  ["m21", "2026-10-31", "15:00", "Cancha 2", "Zona D · Panteras FC vs Cruzados"],
+  ["m22", "2026-10-31", "15:00", "Cancha 3", "Zona D · Tigres vs Apex Aguará"],
+  ["m23", "2026-10-31", "16:00", "Cancha 1", "Zona A · Aguará Guazú vs Panteras KFC"],
+  ["m24", "2026-10-31", "16:00", "Cancha 3", "Zona C · Huemules vs Impulse"],
+  ["m25", "2026-11-07", "14:00", "Cancha 1", "Cuartos Oro · (m25)"],
+  ["m26", "2026-11-07", "14:00", "Cancha 2", "Cuartos Oro · (m26)"],
+  ["m27", "2026-11-07", "14:00", "Cancha 3", "Cuartos Oro · (m27)"],
+  ["m28", "2026-11-07", "15:00", "Cancha 1", "Cuartos Oro · (m28)"],
+  ["m29", "2026-11-07", "15:00", "Cancha 2", "Cuartos Plata · (m29)"],
+  ["m30", "2026-11-07", "15:00", "Cancha 3", "Cuartos Plata · (m30)"],
+  ["m31", "2026-11-07", "16:00", "Cancha 1", "Cuartos Plata · (m31)"],
+  ["m32", "2026-11-07", "16:00", "Cancha 2", "Cuartos Plata · (m32)"],
+  ["m33", "2026-11-14", "15:00", "Cancha 1", "Semifinal Oro · (m33)"],
+  ["m34", "2026-11-14", "15:00", "Cancha 2", "Semifinal Oro · (m34)"],
+  ["m35", "2026-11-14", "16:00", "Cancha 1", "Semifinal Plata · (m35)"],
+  ["m36", "2026-11-14", "16:00", "Cancha 2", "Semifinal Plata · (m36)"],
+  ["m37", "2026-11-21", "15:00", "Cancha 1", "3er puesto Oro · (m37)"],
+  ["m38", "2026-11-21", "15:00", "Cancha 2", "3er puesto Plata · (m38)"],
+  ["m39", "2026-11-21", "17:00", "Cancha 1", "Final Oro · (m39)"],
+  ["m40", "2026-11-21", "17:00", "Cancha 2", "Final Plata · (m40)"]
+];
+
 
 /* ---------------- utilidades de fecha (se pueden pisar en las pruebas) ---------------- */
 function ahora_() { return new Date(); }
@@ -35,23 +84,48 @@ function onOpen() {
 }
 
 function abrirJornada() {
+  var ui = SpreadsheetApp.getUi();
   prepararHojas_();
-  var pin = String(100000 + Math.floor(Math.random() * 900000));
-  escribirConfig_({ pin: pin, fecha: hoy_(), abierta: "SI" });
+  var fecha = hoy_();
+  var ps = FIXTURE.filter(function (f) { return f[1] === fecha; });
+  if (!ps.length) {
+    var resp = ui.prompt("No hay partidos hoy en el fixture",
+      "Escribí la fecha de los partidos para los que querés crear PINs (formato aaaa-mm-dd, por ejemplo 2026-10-17):",
+      ui.ButtonSet.OK_CANCEL);
+    if (resp.getSelectedButton() !== ui.Button.OK) return;
+    fecha = String(resp.getResponseText()).trim();
+    ps = FIXTURE.filter(function (f) { return f[1] === fecha; });
+    if (!ps.length) { ui.alert("Sin partidos", "No encontré partidos para " + fecha + ".", ui.ButtonSet.OK); return; }
+  }
+  ps = ps.slice().sort(function (a, b) { return (a[2] + a[3]).localeCompare(b[2] + b[3]); });
+  var usados = {}, filas = [], texto = [];
+  ps.forEach(function (f) {
+    var pin;
+    do { pin = String(100000 + Math.floor(Math.random() * 900000)); } while (usados[pin]);
+    usados[pin] = true;
+    filas.push([f[0], f[1], f[2], f[3], f[4], pin, ""]);
+    texto.push(f[2] + " · " + f[3] + " · " + f[4] + "  →  PIN " + pin);
+  });
+  var hp = hoja_(HOJA_PINS);
+  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, 7).clearContent();
+  hp.getRange(2, 1, filas.length, 7).setNumberFormat("@").setValues(filas);
+  escribirConfig_({ pin: "", fecha: hoy_(), abierta: "SI" });
   limpiarCache_();
-  SpreadsheetApp.getUi().alert("Jornada abierta",
-    "Fecha: " + hoy_() + "\n\nPIN para los veedores: " + pin +
-    "\n\nPasáselo por WhatsApp. Sirve solo hoy (hasta las " + (leerConfig_().horaCierre || HORA_CIERRE_DEFAULT) +
-    ") y se anula al cerrar la jornada.",
-    SpreadsheetApp.getUi().ButtonSet.OK);
+  ui.alert("Jornada abierta",
+    "Un PIN por partido (también quedan en la hoja \"PINs\"):\n\n" + texto.join("\n") +
+    "\n\nPasale a cada veedor SOLO el PIN de su partido. Sirven hoy hasta las " +
+    (leerConfig_().horaCierre || HORA_CIERRE_DEFAULT) + " y se anulan al cerrar la jornada.",
+    ui.ButtonSet.OK);
 }
 
 function cerrarJornada() {
   prepararHojas_();
   escribirConfig_({ pin: "", abierta: "NO" });
+  var hp = hoja_(HOJA_PINS);
+  if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, 7).clearContent();
   limpiarCache_();
   SpreadsheetApp.getUi().alert("Jornada cerrada",
-    "Los veedores ya no pueden cargar resultados. El PIN anterior quedó anulado.",
+    "Los veedores ya no pueden cargar resultados. Todos los PINs quedaron anulados.",
     SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
@@ -75,6 +149,9 @@ function hoja_(nombre) {
 function prepararHojas_() {
   var hp = hoja_(HOJA_PARTIDOS);
   if (hp.getLastRow() < 1) hp.appendRow(COLUMNAS);
+  else hp.getRange(1, 1, 1, COLUMNAS.length).setValues([COLUMNAS]);
+  var hpin = hoja_(HOJA_PINS);
+  if (hpin.getLastRow() < 1) hpin.appendRow(["partido", "fecha", "hora", "cancha", "encuentro", "PIN", "veedor"]);
   var hc = hoja_(HOJA_CONFIG);
   if (hc.getLastRow() < 1) {
     hc.appendRow(["pin", ""]);
@@ -140,7 +217,19 @@ function parse_(txt) {
   try { var v = JSON.parse(txt); return Array.isArray(v) ? v : []; } catch (e) { return []; }
 }
 
-/* ---------------- seguridad: PIN + jornada ---------------- */
+/* ---------------- seguridad: PIN por partido + jornada ---------------- */
+function buscarPin_(pin) {
+  var hp = hoja_(HOJA_PINS);
+  var n = hp.getLastRow();
+  if (n < 2) return null;
+  var vals = hp.getRange(2, 1, n - 1, 7).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    var p = String(vals[i][5]).trim();
+    if (p && p === pin) return { partido: String(vals[i][0]), encuentro: String(vals[i][4]), fila: i + 2 };
+  }
+  return null;
+}
+
 function validar_(pin) {
   var c = leerConfig_();
   if (String(c.abierta || "").toUpperCase() !== "SI")
@@ -150,11 +239,12 @@ function validar_(pin) {
   var cierre = c.horaCierre || HORA_CIERRE_DEFAULT;
   if (hora_() > cierre)
     return { ok: false, codigo: "hora", error: "La jornada ya cerró (" + cierre + ")." };
-  if (!c.pin || !pin || String(pin).trim() !== c.pin) {
+  var hit = pin ? buscarPin_(String(pin).trim()) : null;
+  if (!hit) {
     Utilities.sleep(1200);   // frena los intentos de adivinar el PIN
     return { ok: false, codigo: "pin", error: "PIN incorrecto." };
   }
-  return { ok: true };
+  return { ok: true, partido: hit.partido, encuentro: hit.encuentro, fila: hit.fila };
 }
 
 function nombreVeedor_(v) {
@@ -184,20 +274,27 @@ function estadoJson_() {
 }
 
 /* ---------------- escritura (solo veedores con PIN) ---------------- */
-function login_(d) {
+function login_(d, v) {
   if (!nombreVeedor_(d.veedor)) return err_("Poné tu nombre.");
-  return { ok: true, fecha: hoy_() };
+  return { ok: true, fecha: hoy_(), partido: v.partido, encuentro: v.encuentro };
 }
 
-function tomar_(d) {
+function dispValido_(x) { return /^[A-Za-z0-9_-]{8,40}$/.test(String(x || "")); }
+
+function tomar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
   if (!/^[A-Za-z0-9_-]{1,20}$/.test(id)) return err_("Partido inválido.");
+  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
   if (!nombre) return err_("Poné tu nombre.");
+  if (!dispValido_(d.disp)) return err_("Recargá la página e intentá de nuevo.");
   var mapa = leerPartidos_(), r = mapa[id] || { id: id }, ts = ahora_().getTime();
-  var ocupado = r.veedor && Number(r.lockHasta) > ts && r.veedor !== nombre;
+  var otro = r.disp ? String(r.disp) !== String(d.disp) : (r.veedor && r.veedor !== nombre);
+  var ocupado = r.veedor && Number(r.lockHasta) > ts && otro;
   if (ocupado && !d.forzar)
-    return { ok: false, ocupado: true, por: r.veedor, codigo: "ocupado", error: "Lo está cargando " + r.veedor + "." };
+    return { ok: false, ocupado: true, por: r.veedor, codigo: "ocupado", error: "Lo está cargando otro dispositivo (" + r.veedor + ")." };
   r.veedor = nombre;
+  r.disp = String(d.disp);
+  if (v.fila) hoja_(HOJA_PINS).getRange(v.fila, 7).setValue(nombre);
   if (/^e\d{1,3}$/.test(String(d.veedorEq || ""))) r.veedorEq = String(d.veedorEq);
   r.lockHasta = ts + MINUTOS_BLOQUEO * 60000;
   if (!r.estado) {
@@ -230,8 +327,9 @@ function listaValida_(lista, max, conTipo) {
   return out;
 }
 
-function guardar_(d) {
+function guardar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
+  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
   var estado = d.estado;
   if (estado !== "EN_JUEGO" && estado !== "FINAL") return err_("Estado inválido.");
   var gl = entero_(d.gl, 99), gv = entero_(d.gv, 99);
@@ -241,8 +339,9 @@ function guardar_(d) {
   if (!goles || !tarjetas) return err_("Detalle de goles o tarjetas inválido.");
 
   var mapa = leerPartidos_(), r = mapa[id];
-  if (!r || r.veedor !== nombre)
-    return { ok: false, codigo: "lock", error: "Ya no tenés este partido. Volvé a tomarlo desde la lista." };
+  var mio = r && (r.disp ? String(r.disp) === String(d.disp) : r.veedor === nombre);
+  if (!mio)
+    return { ok: false, codigo: "lock", error: "Otro dispositivo tomó este partido. Si querés seguir cargando, volvé a entrar y tomalo de nuevo." };
 
   r.estado = estado;
   r.golesLocal = gl; r.golesVisitante = gv;
@@ -255,10 +354,11 @@ function guardar_(d) {
   return { ok: true, partido: publico_(r) };
 }
 
-function liberar_(d) {
+function liberar_(d, v) {
   var id = String(d.id || ""), nombre = nombreVeedor_(d.veedor);
+  if (id !== v.partido) return err_("Ese PIN es de otro partido.", "partido");
   var mapa = leerPartidos_(), r = mapa[id];
-  if (r && r.veedor === nombre) { r.lockHasta = 0; escribirFila_(r, r._fila); limpiarCache_(); }
+  if (r && (r.disp ? String(r.disp) === String(d.disp) : r.veedor === nombre)) { r.lockHasta = 0; escribirFila_(r, r._fila); limpiarCache_(); }
   return { ok: true };
 }
 
@@ -285,10 +385,10 @@ function doPost(e) {
     if (!v.ok) return respuesta_(v);
     lock.waitLock(15000);
     switch (d.accion) {
-      case "login": return respuesta_(login_(d));
-      case "tomar": return respuesta_(tomar_(d));
-      case "guardar": return respuesta_(guardar_(d));
-      case "liberar": return respuesta_(liberar_(d));
+      case "login": return respuesta_(login_(d, v));
+      case "tomar": return respuesta_(tomar_(d, v));
+      case "guardar": return respuesta_(guardar_(d, v));
+      case "liberar": return respuesta_(liberar_(d, v));
       default: return respuesta_(err_("Acción desconocida."));
     }
   } catch (ex) {

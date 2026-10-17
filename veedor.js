@@ -1,7 +1,8 @@
 /* =====================================================================
    PANTALLA DE VEEDORES · Copa Pride
-   Cada veedor entra con el PIN de la jornada, toma un partido y carga
+   Cada veedor entra con el PIN de SU partido (uno por partido) y carga
    goles, tarjetas y penales desde el celular. Todo se guarda solo.
+   Un partido solo lo puede tener un dispositivo a la vez.
    ===================================================================== */
 (function () {
   "use strict";
@@ -14,11 +15,6 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
-  const TZ = "America/Argentina/Buenos_Aires";
-  const hoyBA = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
-  const qs = new URLSearchParams(location.search);
-  // ?dia=AAAA-MM-DD solo sirve para probar la pantalla otro día; el servidor igual exige la jornada abierta.
-  const dia = /^\d{4}-\d{2}-\d{2}$/.test(qs.get("dia") || "") ? qs.get("dia") : hoyBA();
 
   const ls = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -26,7 +22,20 @@
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* sin almacenamiento */ } }
   };
 
-  const S = { nombre: ls.get("cp_nombre") || "", eq: ls.get("cp_equipo") || "", pin: ls.get("cp_pin") || "", remoto: {}, timerLista: null, aviso: "" };
+  // Identificador de ESTE dispositivo (queda guardado): el servidor lo usa para que un partido
+  // no lo carguen dos dispositivos a la vez.
+  function idDispositivo() {
+    let d = ls.get("cp_disp");
+    if (!d || !/^[A-Za-z0-9_-]{8,40}$/.test(d)) {
+      const a = new Uint8Array(12);
+      try { crypto.getRandomValues(a); } catch (e) { for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256); }
+      d = "d" + Array.from(a, (x) => x.toString(36).padStart(2, "0")).join("");
+      ls.set("cp_disp", d);
+    }
+    return d;
+  }
+
+  const S = { nombre: ls.get("cp_nombre") || "", eq: ls.get("cp_equipo") || "", pin: ls.get("cp_pin") || "", disp: idDispositivo(), partido: ls.get("cp_partido") || "", remoto: {}, timerLista: null, aviso: "" };
   let M = null;                 // partido que se está cargando
   let enviando = false, pendiente = false;
   let wake = null;
@@ -36,7 +45,7 @@
     const res = await fetch(D.api, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },   // sin preflight CORS
-      body: JSON.stringify(Object.assign({ accion, pin: S.pin, veedor: S.nombre, veedorEq: S.eq }, datos || {}))
+      body: JSON.stringify(Object.assign({ accion, pin: S.pin, veedor: S.nombre, veedorEq: S.eq, disp: S.disp }, datos || {}))
     });
     return res.json();
   }
@@ -50,7 +59,7 @@
   // Devuelve true si el servidor dijo que la jornada/PIN ya no valen: se vuelve al login.
   function sesionCaida(r) {
     if (r && !r.ok && ["pin", "cerrada", "fecha", "hora"].indexOf(r.codigo) >= 0) {
-      S.pin = ""; ls.del("cp_pin");
+      S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido");
       S.aviso = r.error || "Tenés que volver a entrar.";
       detenerLista();
       pantallaLogin();
@@ -78,12 +87,12 @@
     pintarQuien();
     root.innerHTML = `<form class="vcaja" id="fLogin" autocomplete="off">
       <h2>Entrar como veedor</h2>
-      <p class="vtxt">El PIN te lo pasa la organización el día de la jornada. Solo sirve ese día.</p>
+      <p class="vtxt">El PIN es de tu partido: te lo pasa la organización el día de la jornada. Solo sirve para ese partido y ese día.</p>
       ${S.aviso ? `<p class="vaviso">${esc(S.aviso)}</p>` : ""}
       <label>Tu nombre<input id="iNombre" type="text" maxlength="30" value="${esc(S.nombre)}" placeholder="Ej: Nacho" list="lVeedores" required></label>
       <datalist id="lVeedores">${(D.veedores || []).map((x) => `<option value="${esc(x.nombre)}"></option>`).join("")}</datalist>
       <label>Tu equipo<select id="iEquipo" required><option value="">Elegí tu equipo</option>${A.equipos().slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map((e) => `<option value="${esc(e.id)}" ${e.id === S.eq ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select></label>
-      <label>PIN de la jornada<input id="iPin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 números" required></label>
+      <label>PIN de tu partido<input id="iPin" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 números" required></label>
       <button class="vbtn grande" type="submit" id="bEntrar">Entrar</button>
     </form>`;
     S.aviso = "";
@@ -103,7 +112,11 @@
       try {
         S.nombre = nombre; S.pin = pin;
         const r = await llamar("login");
-        if (r.ok) { ls.set("cp_nombre", S.nombre); ls.set("cp_equipo", S.eq); ls.set("cp_pin", S.pin); await abrirLista(); return; }
+        if (r.ok) {
+          S.partido = r.partido || "";
+          ls.set("cp_nombre", S.nombre); ls.set("cp_equipo", S.eq); ls.set("cp_pin", S.pin); ls.set("cp_partido", S.partido);
+          await abrirLista(); return;
+        }
         S.pin = ""; S.aviso = r.error || "No se pudo entrar."; pantallaLogin();
       } catch (e) {
         S.pin = ""; S.aviso = "No hay conexión. Probá de nuevo."; pantallaLogin();
@@ -118,51 +131,36 @@
 
   function detenerLista() { if (S.timerLista) { clearInterval(S.timerLista); S.timerLista = null; } }
 
+  // Con un PIN por partido, "la lista" es una sola tarjeta: el partido de este veedor.
   async function abrirLista() {
     M = null;
     pintarQuien();
+    detenerLista();
     try { await cargarEstado(); } catch (e) { /* se muestra lo que haya */ }
     pintarLista();
-    detenerLista();
-    S.timerLista = setInterval(async () => {
-      if (document.hidden || M) return;
-      try { await cargarEstado(); pintarLista(); } catch (e) { /* sin conexión */ }
-    }, 8000);
   }
 
   function chipEstado(p) {
     const x = S.remoto[p.id];
-    if (!x || !x.estado) return { clase: "libre", txt: "Libre" };
+    if (!x || !x.estado) return { clase: "libre", txt: "Todavía no empezó" };
     const marc = `${x.gl}-${x.gv}`;
     if (x.estado === "FINAL") return { clase: "final", txt: "Final " + marc };
-    if (x.veedor === S.nombre) return { clase: "mio", txt: "Lo cargás vos · " + marc };
-    if (x.lock) return { clase: "ocupado", txt: "En carga: " + esc(x.veedor) + " · " + marc };
-    return { clase: "libre", txt: "En juego " + marc + " · libre" };
+    return { clase: "mio", txt: "En juego " + marc };
   }
 
   function pintarLista() {
-    const ps = A.partidos().filter((p) => p.fecha === dia)
-      .sort((a, b) => (a.hora + a.cancha).localeCompare(b.hora + b.cancha, "es", { numeric: true }));
-    let html = `<h2 class="vtit">Partidos de hoy</h2><p class="vtxt">${esc(A.fechaLarga(dia))}. Tocá el partido que vas a cargar.</p>`;
-    if (!ps.length) {
-      const fechas = [...new Set(A.partidos().filter((p) => p.fecha && p.fecha > dia && p.fase === "Zona").map((p) => p.fecha))].sort().slice(0, 3);
-      html += `<div class="vcaja"><p>Hoy no hay partidos del torneo.</p>` +
-        (fechas.length ? `<p class="vtxt" style="margin-top:.8rem">Para probar el sistema, abrí los partidos de otra fecha:</p>` +
-          fechas.map((f) => `<p style="margin:.5rem 0"><a class="vbtn" style="display:inline-block;text-decoration:none" href="veedor.html?dia=${esc(f)}">${esc(A.fechaLarga(f))}</a></p>`).join("") : "") +
-        `</div>`;
+    const p = A.partidos().find((x) => x.id === S.partido);
+    let html = `<h2 class="vtit">Tu partido</h2>`;
+    if (!p) {
+      html += `<div class="vcaja"><p>Este PIN es de un partido que no está en la lista. Avisale a la organización.</p></div>`;
+    } else if (!A.equipo(p.local) || !A.equipo(p.visitante)) {
+      html += `<div class="vcaja"><p>Los equipos de este partido todavía no están definidos. Avisale a la organización.</p></div>`;
     } else {
-      const horas = [...new Set(ps.map((p) => p.hora))];
-      horas.forEach((h) => {
-        html += `<h3 class="vhora">${esc(h)}</h3><div class="vlista">`;
-        ps.filter((p) => p.hora === h).forEach((p) => {
-          const listo = A.equipo(p.local) && A.equipo(p.visitante);
-          const c = chipEstado(p);
-          html += `<button type="button" class="vp ${c.clase}" data-act="abrir" data-id="${esc(p.id)}" ${listo ? "" : "disabled"}>
-            <span class="vp-top"><span>${esc(p.cancha)} · ${esc(A.faseLabel(p))}</span><span class="vp-est">${listo ? c.txt : "Equipos por definir"}</span></span>
-            <span class="vp-eq">${equiposTxt(p)}</span></button>`;
-        });
-        html += `</div>`;
-      });
+      const c = chipEstado(p);
+      html += `<p class="vtxt">${esc(A.fechaLarga(p.fecha))}. Tocá el partido para cargarlo.</p>
+        <div class="vlista"><button type="button" class="vp ${c.clase}" data-act="abrir" data-id="${esc(p.id)}">
+          <span class="vp-top"><span>${esc(p.hora)} · ${esc(p.cancha)} · ${esc(A.faseLabel(p))}</span><span class="vp-est">${c.txt}</span></span>
+          <span class="vp-eq">${equiposTxt(p)}</span></button></div>`;
     }
     root.innerHTML = html;
   }
@@ -182,7 +180,7 @@
     if (!r.ok) {
       if (sesionCaida(r)) return;
       if (r.ocupado) {
-        if (confirm(`${r.por} lo está cargando. ¿Tomarlo igual?\n\nHacelo solo si ${r.por} se quedó sin batería o ya no está cargando.`)) return abrirPartido(id, true);
+        if (confirm(`Este partido lo está cargando otro dispositivo (${r.por}).\n\n¿Tomarlo en este dispositivo? El otro deja de poder cargar.\n\nHacelo solo si el otro se quedó sin batería o ya no lo estás usando.`)) return abrirPartido(id, true);
         return;
       }
       alert(r.error || "No se pudo tomar el partido.");
@@ -195,7 +193,7 @@
     // Si quedó algo sin enviar en este celular (se cortó la conexión), se recupera.
     try {
       const d = JSON.parse(ls.get("cp_draft_" + id) || "null");
-      if (d && d.sent === false && d.nombre === S.nombre) {
+      if (d && d.sent === false && d.nombre === S.nombre && d.disp === S.disp) {
         Object.assign(M, { estado: d.estado, goles: d.goles, tarjetas: d.tarjetas, pl: d.pl, pv: d.pv });
         guardarYa();
       }
@@ -260,7 +258,7 @@
     pintarQuien();
     const final = M.estado === "FINAL";
     root.innerHTML = `
-      <div class="vbar"><button type="button" class="vbtn chico" data-act="lista">← Lista</button>
+      <div class="vbar"><button type="button" class="vbtn chico" data-act="lista">← Inicio</button>
         <span class="vmeta">${esc(M.p.cancha)} · ${esc(M.p.hora)} · ${esc(A.faseLabel(M.p))}</span>
         <span id="vGuardado" class="vchip ${M.guardado}">${guardadoTxt()}</span></div>
       <div class="vmarc">
@@ -275,7 +273,7 @@
       <div class="vfin">
         ${final
           ? `<button type="button" class="vbtn grande" data-act="reabrir">Reabrir para corregir</button>
-             <button type="button" class="vbtn grande sec" data-act="lista">Volver a la lista</button>`
+             <button type="button" class="vbtn grande sec" data-act="lista">Volver al inicio</button>`
           : `<button type="button" class="vbtn grande fin" data-act="finalizar">Finalizar partido</button>
              <button type="button" class="vbtn sec" data-act="soltar">Soltar el partido sin finalizar</button>`}
       </div>`;
@@ -312,7 +310,7 @@
   }
 
   function guardarBorrador(sent) {
-    ls.set("cp_draft_" + M.id, JSON.stringify({ nombre: S.nombre, sent, estado: M.estado, goles: M.goles, tarjetas: M.tarjetas, pl: M.pl, pv: M.pv }));
+    ls.set("cp_draft_" + M.id, JSON.stringify({ nombre: S.nombre, disp: S.disp, sent, estado: M.estado, goles: M.goles, tarjetas: M.tarjetas, pl: M.pl, pv: M.pv }));
   }
 
   function cambio() { guardarBorrador(false); pintarPartido(); guardarYa(); }
@@ -330,6 +328,7 @@
         if (r.ok) { if (M === yo) { M.guardado = pendiente ? "pend" : "ok"; if (!pendiente) guardarBorrador(true); } }
         else if (sesionCaida(r)) { break; }
         else if (r.codigo === "lock") { M.guardado = "lock"; pintarGuardado(); alert(r.error); break; }
+        else if (r.codigo === "partido") { M.guardado = "err"; pintarGuardado(); alert(r.error || "Ese PIN es de otro partido."); break; }
         else { M.guardado = "err"; pintarGuardado(); alert(r.error || "No se pudo guardar."); break; }
       } catch (e) {
         if (!M) break;
@@ -390,14 +389,14 @@
     if (a === "finalizar") return finalizar();
     if (a === "reabrir") { M.estado = "EN_JUEGO"; return cambio(); }
     if (a === "lista") return volverALista(false);
-    if (a === "soltar") { if (confirm("¿Soltar el partido? Otro veedor lo va a poder tomar.")) return volverALista(true); }
+    if (a === "soltar") { if (confirm("¿Soltar el partido? Otro dispositivo lo va a poder tomar.")) return volverALista(true); }
   });
 
   document.addEventListener("click", (ev) => {
     const b = ev.target.closest('[data-act="salir"]');
     if (!b) return;
     if (!confirm("¿Salir? Vas a tener que volver a poner el PIN.")) return;
-    S.pin = ""; ls.del("cp_pin"); detenerLista(); soltarPantalla(); M = null; pintarQuien(); pantallaLogin();
+    S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); detenerLista(); soltarPantalla(); M = null; pintarQuien(); pantallaLogin();
   });
 
   /* ---------------- arranque ---------------- */
@@ -409,8 +408,12 @@
     if (S.pin && S.nombre) {
       try {
         const r = await llamar("login");
-        if (r.ok) { await abrirLista(); return; }
-        S.pin = ""; ls.del("cp_pin"); S.aviso = r.error || "";
+        if (r.ok) {
+          S.partido = r.partido || ""; ls.set("cp_partido", S.partido);
+          await abrirLista();
+          return;
+        }
+        S.pin = ""; ls.del("cp_pin"); S.partido = ""; ls.del("cp_partido"); S.aviso = r.error || "";
       } catch (e) { S.aviso = "No hay conexión para verificar tu PIN."; }
     }
     pantallaLogin();
