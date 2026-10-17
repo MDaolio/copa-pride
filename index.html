@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Copa Pride</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Intro con el logo: la pelota cae entre la C y la P, rebota dos veces y festeja; se va sola o con un toque -->
+  <div id="intro" aria-hidden="true">
+    <div class="intro-in">
+      <div class="intro-logo"><div class="il-wrap"><img class="il-base" src="img/logo-copa-sinpelota.png" alt=""><img class="il-ball" src="img/pelota-copa.png" alt=""><span class="il-rebote"></span><span class="il-confeti" id="ilConfeti"></span></div></div>
+    </div>
+  </div>
+  <script src="intro.js"></script>
+  <!-- Si ves este cartel, es porque faltan archivos. Se oculta solo cuando todo carga bien. -->
+  <div id="falta" style="background:#fff3cd;color:#3b2f00;padding:16px;font:16px/1.4 Arial,sans-serif;border-bottom:3px solid #c8932a">
+    <b>Faltan archivos de la página.</b><br>
+    Si abriste <code>index.html</code> desde adentro del .zip, no funciona: Windows solo saca ese archivo suelto.<br>
+    Hacé clic derecho en el .zip → <b>Extraer todo…</b>, y abrí <code>index.html</code> desde la carpeta extraída
+    (tienen que estar juntos <code>index.html</code>, <code>style.css</code>, <code>app.js</code> y <code>data.js</code>).
+  </div>
+
+  <div class="shell">
+    <aside class="rail">
+      <a class="logo" href="#/inicio">
+        <img class="logo-img" src="img/logo.png" alt="Copa Pride">
+        <span class="logo-txt"><span class="logo-t" id="logoTitulo" hidden></span><span class="logo-s" id="logoSub"></span></span>
+      </a>
+      <nav id="nav" class="nav">
+        <a href="#/inicio" data-p="inicio">Inicio</a>
+        <a href="#/fixture" data-p="fixture">Fixture</a>
+        <a href="#/zonas" data-p="zonas">Zonas</a>
+        <a href="#/copas" data-p="copas">Copas</a>
+        <a href="#/equipos" data-p="equipos">Equipos</a>
+        <a href="#/estadisticas" data-p="estadisticas">Estadísticas</a>
+        <a href="#/historial" data-p="historial">Historial</a>
+      </nav>
+      <div class="rail-pie"><b id="pieLema"></b><span id="pieSub"></span><img src="img/liga-pride.png" alt="Liga Pride" style="height:34px;width:auto;align-self:flex-start"><a class="soy-veedor" href="veedor.html">Soy veedor →</a></div>
+    </aside>
+
+    <div class="main">
+      <header class="mtop"><a href="#/inicio"><img src="img/logo.png" alt="Copa Pride"></a><b>Juntxs por el deporte</b></header>
+      <div id="aviso" class="aviso" hidden>DATOS DE EJEMPLO · reemplazalos en data.js</div>
+      <main id="app" class="wrap"></main>
+    </div>
+  </div>
+
+  <nav id="tabbar" class="tabbar" aria-label="Secciones">
+    <a href="#/inicio" data-p="inicio"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Inicio</a>
+    <a href="#/fixture" data-p="fixture"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Fixture</a>
+    <a href="#/zonas" data-p="zonas"><svg viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18M8 5v14"/></svg>Zonas</a>
+    <a href="#/copas" data-p="copas"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H3v2a3 3 0 0 0 4 2M17 6h4v2a3 3 0 0 1-4 2M12 14v4M8 21h8"/></svg>Copas</a>
+    <details id="mas" data-mas="1"><summary><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Más</summary>
+      <div class="mas-panel">
+        <a href="#/equipos" data-p="equipos">Equipos</a>
+        <a href="#/estadisticas" data-p="estadisticas">Estadísticas</a>
+        <a href="#/historial" data-p="historial">Historial</a>
+        <a class="soy-veedor" href="veedor.html">Soy veedor →</a>
+      </div>
+    </details>
+  </nav>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+RESULTADOS EN VIVO - PASO A PASO (se hace una sola vez, 10 minutos)
+====================================================================
+
+1) Entrá a https://sheets.google.com con la cuenta de la liga y creá una planilla nueva
+   (nombre sugerido: "Copa Pride - En vivo").
+
+2) Menú: Extensiones > Apps Script.
+   Borrá lo que haya, pegá TODO el contenido del archivo apps-script/Code.gs y guardá (ícono del disquete).
+
+3) Volvé a la planilla y recargá la página (F5). Va a aparecer un menú nuevo: "Copa Pride".
+   La primera vez que lo uses Google pide permisos: "Revisar permisos" > tu cuenta > Avanzado > Continuar.
+   (Es normal: es tu propio script.)
+
+4) En Apps Script: botón azul "Implementar" > "Nueva implementación" > engranaje > "Aplicación web".
+     - Ejecutar como: YO
+     - Quién tiene acceso: CUALQUIER PERSONA
+   Implementar y copiar la URL que termina en /exec.
+
+5) Abrí data.js y pegá esa URL en:   api: "https://script.google.com/macros/s/.../exec",
+   Poné también   ejemplo: false   cuando cargues los datos reales.
+
+6) Probá: abrí veedor.html en tu compu.
+
+CADA DÍA DE JORNADA
+-------------------
+- Menú "Copa Pride" > "Abrir jornada de hoy". Te muestra un PIN de 6 números.
+- Pasale el PIN a los veedores por WhatsApp junto con el link a veedor.html.
+- El PIN solo sirve HOY y hasta las 23:30. Después se cierra solo.
+- Si un PIN se filtra o termina todo antes: "Copa Pride" > "Cerrar jornada" (el PIN deja de valer al instante).
+- Al día siguiente, el PIN de ayer no funciona aunque nadie lo haya cerrado.
+
+COMO USAN LA PANTALLA LOS VEEDORES
+----------------------------------
+- Ponen su nombre y el PIN. Ven los partidos del día.
+- Tocan el partido que les toca: queda reservado a su nombre (25 min, se renueva solo mientras cargan).
+  Si dos veedores quieren el mismo partido, el segundo recibe un aviso.
+- GOL / Amarilla / Roja -> eligen jugador. Todo se guarda solo, con cada toque.
+- Playoff empatado: cargan penales.
+- "Finalizar partido" confirma el resultado (no necesita aprobación tuya). Si se equivocan: "Reabrir para corregir".
+- Si se cae el internet, la pantalla reintenta sola y no pierde lo cargado (no cerrar la página).
+
+QUE VE EL PUBLICO
+-----------------
+La página pública solo LEE: partidos "EN VIVO" y resultados. Las tablas y estadísticas cuentan solo partidos finalizados.
+
+IMPORTANTE
+----------
+- Los equipos/jugadores/horarios salen de data.js: tienen que estar cargados antes de la jornada.
+- Si cambiás Code.gs, hay que volver a implementar (Implementar > Administrar implementaciones > editar > Nueva versión).
+- Seguridad: el PIN es una barrera práctica para que nadie modifique datos fuera de la jornada; no es seguridad bancaria.

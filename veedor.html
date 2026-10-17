@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Veedores · Copa Pride</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="veedor.css">
+</head>
+<body class="vee">
+  <!-- Si ves este cartel, es porque faltan archivos. Se oculta solo cuando todo carga bien. -->
+  <div id="falta" style="background:#fff3cd;color:#3b2f00;padding:16px;font:16px/1.4 Arial,sans-serif;border-bottom:3px solid #c8932a">
+    <b>Faltan archivos de la página.</b> Tienen que estar juntos en la misma carpeta:
+    <code>veedor.html</code>, <code>veedor.css</code>, <code>veedor.js</code>, <code>style.css</code>, <code>app.js</code> y <code>data.js</code>.
+  </div>
+
+  <header class="vtop">
+    <div class="vtop-in">
+      <div class="vlogo-w"><img src="img/logo.png" alt="Copa Pride"><div class="vlogo"><b>Veedores</b><span id="vSub"></span></div></div>
+      <div class="vquien" id="vQuien" hidden>
+        <span id="vNombre"></span>
+        <button type="button" class="vsalir" data-act="salir">Salir</button>
+      </div>
+    </div>
+    <div class="franja"></div>
+  </header>
+
+  <main id="v-app" class="vwrap"></main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="veedor.js"></script>
+</body>
+</html>

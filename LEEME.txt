@@ -1,0 +1,28 @@
+COPA PRIDE - PÁGINA DE RESULTADOS (versión 2, datos de ejemplo)
+
+IMPORTANTE ANTES DE ABRIRLA
+- Hacé clic derecho en el .zip -> "Extraer todo...". NO abras index.html desde
+  adentro del zip: Windows saca solo ese archivo y la página sale pelada.
+- Tienen que estar juntos: index.html, style.css, app.js y data.js.
+  (Si falta alguno, la página muestra un cartel amarillo avisándote.)
+
+CÓMO VERLA
+- Abrí index.html con doble click, en cualquier navegador. No hay que instalar nada.
+
+CÓMO EDITARLA
+- Todos los datos están en data.js: equipos, jugadores, partidos, llaves, historial,
+  sede, suspendidos. Abrilo con Visual Studio Code (gratis) o el Bloc de notas.
+- Cargar un resultado: en el partido, poné golesLocal / golesVisitante (null = sin jugar),
+  los goles en "goles" y las tarjetas en "tarjetas".
+- Posiciones, mejores goleadores, valla menos vencida y fair play se calculan solos.
+- Fotos y escudos: copialos en img/jugadores o img/escudos y poné la ruta en "foto" o
+  "escudo" (ej: "img/jugadores/lucas.jpg"). Cargá fotos solo de quienes lo autoricen.
+- Mapa de canchas: poné la imagen en img/ y su ruta en data.js (sede -> mapa).
+- Cuando cargues datos reales, poné ejemplo: false.
+
+PUBLICARLA (más adelante)
+- Subí la carpeta completa a Netlify, GitHub Pages o Cloudflare Pages.
+
+ARCHIVOS
+- index.html: estructura | style.css: diseño negro y dorado
+- app.js: lógica        | data.js: TUS DATOS
