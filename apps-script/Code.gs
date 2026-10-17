@@ -434,6 +434,8 @@ function doPost(e) {
   try {
     var d;
     try { d = JSON.parse(e.postData.contents); } catch (x) { return respuesta_(err_("Pedido inválido.")); }
+    // Si el celu todavía tiene guardada una versión vieja de la página (sin identificador de dispositivo), se arma uno con el nombre.
+    if (!dispValido_(d.disp)) d.disp = "disp-" + String(d.veedor || "x").replace(/[^A-Za-z0-9]/g, "") + "-0";
     // El PIN y la jornada se validan ANTES de tomar el candado, así un PIN
     // incorrecto (que espera 1 segundo a propósito) no traba a los demás veedores.
     var v = validar_(d.pin);
