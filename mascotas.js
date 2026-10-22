@@ -1,6 +1,6 @@
 /* Mascotas del festejo de gol: dibujos originales en SVG, por id de equipo.
    Cada mascota tiene dos poses: "corre" (de costado, mirando a la derecha) y "sienta" (de frente).
-   Para sumar otra (ej. el perro de Dogos, e5) alcanza con agregar sus dos dibujos acá. */
+   Para sumar otra alcanza con agregar sus dos dibujos acá. */
 (function () {
   "use strict";
 
@@ -118,8 +118,71 @@
     </g>
   </svg>`;
 
+
+  /* ---------------- Dogo argentino ---------------- */
+  const BLANCO = "#fbfbf8", SOMBRA = "#dfe4ea", ROSA = "#f4a6b4", DOGO_NEGRO = "#1d1d22", COLLAR = "#2f8fe0", CHAPITA = "#f2c14e";
+
+  const DOGO_CORRE = `<svg viewBox="0 0 200 140" aria-hidden="true">
+    <g class="mc-cola-corre"><path d="M48 58 C36 52 22 46 8 46 C20 52 32 60 46 66 Z" fill="${SOMBRA}"/></g>
+    ${pata("p-tras-lejos", 58, 76, 42, 10, SOMBRA, SOMBRA)}
+    ${pata("p-del-lejos", 126, 76, 42, 10, SOMBRA, SOMBRA)}
+    <ellipse cx="90" cy="64" rx="47" ry="25" fill="${BLANCO}"/>
+    <path d="M52 74 C70 90 112 90 132 76 C112 84 74 84 52 74 Z" fill="${SOMBRA}"/>
+    <ellipse cx="60" cy="68" rx="20" ry="18" fill="${BLANCO}"/>
+    <path d="M48 62 C52 74 62 80 72 80" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M112 44 C118 36 128 30 140 30 C144 44 138 58 126 66 Z" fill="${BLANCO}"/>
+    <path d="M124 34 C130 44 136 52 140 58" stroke="${COLLAR}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="138" cy="62" r="4.2" fill="${CHAPITA}"/>
+    ${pata("p-tras-cerca", 64, 78, 44, 11, BLANCO, BLANCO)}
+    ${pata("p-del-cerca", 120, 78, 44, 11, BLANCO, BLANCO)}
+    <g class="mc-cabeza-corre">
+      <path d="M134 22 C128 22 124 30 128 38 C132 34 136 30 140 28 Z" fill="${ROSA}" opacity=".9"/>
+      <ellipse cx="150" cy="36" rx="22" ry="19" fill="${BLANCO}"/>
+      <path d="M156 30 C172 28 186 32 190 40 C190 50 182 56 166 56 C158 56 152 50 152 44 Z" fill="${BLANCO}"/>
+      <path d="M166 56 C174 56 184 54 189 48" stroke="${SOMBRA}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="189" cy="37" rx="5" ry="4.2" fill="${DOGO_NEGRO}"/><ellipse cx="187.6" cy="35.6" rx="1.4" ry=".9" fill="#fff" opacity=".7"/>
+      <path class="mc-lengua" d="M168 54 C168 66 178 68 180 58 C178 55 174 54 168 54 Z" fill="#ff7b93"/>
+      <ellipse cx="152" cy="29" rx="8" ry="7" fill="${DOGO_NEGRO}" opacity=".9"/>
+      <path d="M148 30 Q153 26 158 30" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M134 18 C126 14 120 22 124 32 C128 30 132 26 138 24 Z" fill="${SOMBRA}"/>
+      <ellipse cx="160" cy="46" rx="4" ry="2.2" fill="#ff8f8f" opacity=".55"/>
+    </g>
+  </svg>`;
+
+  const DOGO_SIENTA = `<svg viewBox="0 0 120 160" aria-hidden="true">
+    <g class="mc-cola"><path d="M84 140 C100 138 108 126 106 110 C105 104 100 105 100 110 C100 122 94 130 82 132 Z" fill="${SOMBRA}"/></g>
+    <g class="mc-cuerpo">
+      <ellipse cx="60" cy="116" rx="31" ry="32" fill="${BLANCO}"/>
+      <ellipse cx="34" cy="138" rx="15" ry="13" fill="${SOMBRA}"/><ellipse cx="86" cy="138" rx="15" ry="13" fill="${SOMBRA}"/>
+      <ellipse cx="29" cy="151" rx="11" ry="5.5" fill="${BLANCO}"/><ellipse cx="91" cy="151" rx="11" ry="5.5" fill="${BLANCO}"/>
+      <path d="M44 100 C50 112 70 112 76 100" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <rect x="44" y="104" width="13" height="48" rx="6.5" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><rect x="63" y="104" width="13" height="48" rx="6.5" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/>
+      <path d="M47 151 v-4 M50.5 152 v-5 M54 151 v-4 M66 151 v-4 M69.5 152 v-5 M73 151 v-4" stroke="${SOMBRA}" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M36 86 C46 94 74 94 84 86" stroke="${COLLAR}" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="97" r="5.4" fill="${CHAPITA}"/><circle cx="60" cy="97" r="2.4" fill="#d79a1c"/>
+    </g>
+    <g class="mc-cabeza">
+      <g class="mc-oreja-i"><path d="M38 40 C28 36 20 44 22 56 C24 62 30 62 34 56 C36 50 38 46 42 44 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><path d="M34 44 C28 44 26 50 27 55 C30 56 32 52 34 48 Z" fill="${ROSA}"/></g>
+      <g class="mc-oreja-d"><path d="M82 40 C92 36 100 44 98 56 C96 62 90 62 86 56 C84 50 82 46 78 44 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><path d="M86 44 C92 44 94 50 93 55 C90 56 88 52 86 48 Z" fill="${ROSA}"/></g>
+      <ellipse cx="60" cy="56" rx="27" ry="24" fill="${BLANCO}"/>
+      <path d="M50 38 C54 42 56 46 58 50 M70 38 C66 42 64 46 62 50" stroke="${SOMBRA}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="44" cy="74" rx="10" ry="8" fill="${BLANCO}"/><ellipse cx="76" cy="74" rx="10" ry="8" fill="${BLANCO}"/>
+      <path d="M36 76 C40 84 50 86 56 82 M84 76 C80 84 70 86 64 82" stroke="${SOMBRA}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path class="mc-lengua" d="M54 80 C54 92 66 92 66 80 Z" fill="#ff7b93"/><path d="M60 82 v6" stroke="#e35d78" stroke-width="1.2"/>
+      <path d="M48 76 Q54 82 60 76 Q66 82 72 76" stroke="${DOGO_NEGRO}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M60 70 v6" stroke="${DOGO_NEGRO}" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="60" cy="67" rx="7.5" ry="5.4" fill="${DOGO_NEGRO}"/><ellipse cx="62" cy="68.4" rx="2.4" ry="1.4" fill="${ROSA}"/><ellipse cx="57.6" cy="65.4" rx="2" ry="1.1" fill="#fff" opacity=".7"/>
+      <ellipse cx="71" cy="53" rx="9" ry="8" fill="${DOGO_NEGRO}" opacity=".9"/>
+      <g class="mc-ojos"><ellipse cx="49" cy="54" rx="4.4" ry="5.4" fill="${DOGO_NEGRO}"/><ellipse cx="71" cy="54" rx="4.4" ry="5.4" fill="#000"/>
+        <circle cx="50.6" cy="52.2" r="1.8" fill="#fff"/><circle cx="72.6" cy="52.2" r="1.8" fill="#fff"/>
+        <circle cx="47.8" cy="56" r=".9" fill="#fff"/><circle cx="69.8" cy="56" r=".9" fill="#fff"/></g>
+      <ellipse cx="40" cy="64" rx="4.2" ry="2.4" fill="#ff8f8f" opacity=".55"/><ellipse cx="80" cy="64" rx="4.2" ry="2.4" fill="#ff8f8f" opacity=".55"/>
+    </g>
+  </svg>`;
+
   window.MASCOTAS_COPA = {
     e1: { corre: AGUARA_CORRE, sienta: AGUARA_SIENTA, brisa: "#ffe2b8" },   // Aguará Guazú
+    e5: { corre: DOGO_CORRE, sienta: DOGO_SIENTA, brisa: "#cfe9ff" },       // DOGOS F5
     e11: { corre: HUEMUL_CORRE, sienta: HUEMUL_SIENTA, brisa: "#f1e3c6" }   // Huemules
   };
 })();

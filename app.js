@@ -947,7 +947,8 @@
     const todas = [...document.querySelectorAll(".mt.fin[data-id]")];
     const tieneMasc = (c) => { const p = partidos().find((x) => x.id === c.dataset.id); return p && (MASCOTAS[p.local] || MASCOTAS[p.visitante]); };
     const vistos = new Set();
-    const cards = [...todas.filter(tieneMasc), ...todas].filter((c) => !vistos.has(c.dataset.id) && vistos.add(c.dataset.id)).slice(0, 2);
+    const conMascota = todas.filter(tieneMasc);
+    const cards = (conMascota.length ? conMascota : todas).filter((c) => !vistos.has(c.dataset.id) && vistos.add(c.dataset.id)).slice(0, conMascota.length ? 4 : 2);
     const lista = cards.map((c) => {
       const p = partidos().find((x) => x.id === c.dataset.id);
       // Si juega un equipo con mascota, el gol de la demo es de ese equipo, así se ve el dibujo.
