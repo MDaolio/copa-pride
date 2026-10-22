@@ -340,24 +340,33 @@
       .sort((a, b) => b.partidos - a.partidos || b.fechas - a.fechas || a.nombre.localeCompare(b.nombre, "es"));
   }
 
-  /* Marcador de partido: equipos a los costados, resultado en el centro. */
+  /* Palitos de gol, como en la planilla: grupos de 5 (cuatro rayas y la tachada). */
+  function palitos(n) {
+    n = Number(n) || 0;
+    if (n <= 0) return `<span class="pal pal0" aria-label="0">·</span>`;
+    const MAX = 25, t = Math.min(n, MAX);
+    let h = "";
+    for (let i = 0; i < Math.floor(t / 5); i++) h += `<span class="g5"><s></s><s></s><s></s><s></s></span>`;
+    if (t % 5) h += `<span class="g">${"<s></s>".repeat(t % 5)}</span>`;
+    return `<span class="pal" role="img" aria-label="${n}">${h}${n > MAX ? `<em>+${n - MAX}</em>` : ""}</span>`;
+  }
+
+  /* Partido como renglón de planilla: hora y cancha a la izquierda, equipos apilados con su casillero de goles. */
   function marcador(p, o) {
     o = o || {};
     const ok = jugado(p), live = enVivo(p), gan = ganadorId(p), pe = p.penales || {};
     const muestra = ok || live;
     const clsDe = (id) => (ok && gan ? (gan === id ? "gana" : "pierde") : "");
-    const lado = (id, k) => {
+    const fila = (id, k, v, pen) => {
       const e = equipo(id);
       const nom = e ? esc(e.nombre) : esc(resolverSlot(id).texto || "?");
       const href = e ? ` href="#/equipo/${esc(id)}"` : "";
-      return `<a class="mt-eq ${k} ${clsDe(id)}"${href}>${badge(e, "med")}<span class="n${e ? "" : " tbd"}">${nom}</span>${paisTag(e)}</a>`;
+      const gl = muestra ? `${esc(v)}${pen != null ? `<i>(${esc(pen)})</i>` : ""}` : "";
+      return `<a class="mt-eq ${k} ${clsDe(id)}"${href}>${badge(e, "chico")}<span class="n${e ? "" : " tbd"}">${nom}</span>${paisTag(e)}<b class="gl${muestra ? "" : " vacio"}">${gl}</b></a>`;
     };
-    const g = (v, pen, id) => `<b class="${clsDe(id)}">${esc(v)}${pen != null ? `<i>(${esc(pen)})</i>` : ""}</b>`;
-    const sc = muestra ? `${g(p.golesLocal, pe.local, p.local)}<u>–</u>${g(p.golesVisitante, pe.visitante, p.visitante)}` : `<span class="vs">VS</span>`;
-    const partes = [];
-    if (o.sin !== "hora") partes.push(esc(p.hora));
-    if (o.sin !== "cancha") partes.push(esc(p.cancha));
-    partes.push(esc(faseLabel(p)));
+    const meta = [];
+    if (o.sin !== "hora") meta.push(`<b>${esc(p.hora)}</b>`);
+    if (o.sin !== "cancha") meta.push(`<span>${esc(p.cancha)}</span>`);
     const tag = ok ? `<span class="tag">${p.wo ? "W.O." : "FINAL"}</span>` : live ? '<span class="tag vivo"><i></i>EN VIVO</span>' : '<span class="tag pend">PRÓXIMO</span>';
     let pie = "";
     if (o.veedor && p.veedor) pie += `<p class="veedor">Veedor: ${veedorTxt(p.veedor, p.veedorEq)}</p>`;
@@ -365,7 +374,7 @@
       const { am, ro, az } = contarTarj(p.tarjetas);
       pie += `<details${live ? " open" : ""}><summary><span>⚽ ${p.golesLocal + p.golesVisitante}</span><span>🟨 ${am}</span>${ro ? `<span>🟥 ${ro}</span>` : ""}${az ? `<span>🟦 ${az}</span>` : ""}<span class="chev">▾</span></summary>${detalle(p)}</details>`;
     }
-    return `<article class="mt ${live ? "live" : ""}"><div class="mt-h"><span>${partes.join(" · ")}</span>${tag}</div>${lado(p.local, "l")}<div class="mt-sc">${sc}</div>${lado(p.visitante, "v")}${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
+    return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
   }
   const tarjetaResultado = (p) => marcador(p, { detalle: true, veedor: true });
   const tarjetaLista = (p) => marcador(p, { detalle: true, veedor: true });
@@ -387,34 +396,47 @@
     if (/Semi/i.test(f)) return "Semifinales";
     return "Finales";
   }
+  const MESES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+  const DIAS3 = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
   function heroInicio(fechas, rango, nCanchas, sede) {
     const unicas = [...new Set(fechas)];
     const hoy = hoyBA();
     const prox = unicas.find((f) => f >= hoy);
-    let titulo, dia, cuenta = "";
+    let titulo, num, mes, dia, cuenta = "";
     if (prox) {
-      const dias = Math.round((new Date(prox + "T12:00:00") - new Date(hoy + "T12:00:00")) / 86400000);
+      const d = new Date(prox + "T12:00:00");
+      const dias = Math.round((d - new Date(hoy + "T12:00:00")) / 86400000);
       titulo = etiquetaFecha(prox);
-      dia = fechaLarga(prox);
-      cuenta = dias === 0 ? `<div class="af-cuenta"><b>HOY</b><span>se juega</span></div>`
-        : dias === 1 ? `<div class="af-cuenta"><b>MAÑANA</b><span>se juega</span></div>`
-        : `<div class="af-cuenta"><small>Faltan</small><b>${dias}</b><span>días</span></div>`;
+      num = String(d.getDate()); mes = MESES[d.getMonth()]; dia = DIAS3[d.getDay()];
+      cuenta = dias === 0 ? "¡Se juega HOY!" : dias === 1 ? "Se juega MAÑANA" : `Faltan ${dias} días`;
     } else {
-      titulo = "Terminó la Copa";
-      dia = D.estado || "Gracias por jugar";
+      titulo = "Terminó la Copa"; num = "FIN"; mes = ""; dia = D.estado || "Gracias por jugar";
     }
-    return `<section class="afiche">
-        <div class="af-logo"><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"></div>
-        <div class="af-txt">
-          <p class="hero-lema">${esc(D.lema || "")}</p>
-          <h2 class="af-fecha">${esc(titulo)}</h2>
-          <p class="af-dia">${esc(dia)}</p>
-          ${cuenta}
-          <p class="af-rango">${esc(rango)}${D.horario ? "<br>" + esc(D.horario) : ""}</p>
-          <ul class="af-datos"><li><b>${equipos().length}</b>equipos</li><li><b>${zonas().length}</b>zonas</li></ul>
+    return `<section class="cab">
+        <div class="cab-marca"><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"><p>${esc(D.lema || "")}</p></div>
+        <div class="cab-fecha">
+          <p class="k">${prox ? "Próxima fecha" : "Copa Pride"}</p>
+          <div class="cab-num"><b>${esc(num)}</b><span>${esc(mes)}<br>${esc(dia)}</span></div>
+          <h2>${esc(titulo)}</h2>
+          ${cuenta ? `<p class="cab-cuenta">${esc(cuenta)}</p>` : ""}
+          <p class="cab-hs">${esc(D.horario || rango)}</p>
           <div class="hero-cta"><a class="btn" href="#/fixture">Ver fixture</a><a class="btn sec" href="#/zonas">Ver zonas</a></div>
         </div>
       </section>`;
+  }
+
+  /* Seguí a tu equipo: se guarda en el celu de cada uno (no es un dato de la liga). */
+  function miEquipoId() { try { return localStorage.getItem("copaMiEq") || ""; } catch (e) { return ""; } }
+  function miEquipoHtml() {
+    const id = miEquipoId(), e = equipo(id);
+    const opts = `<option value="">${e ? "Dejar de seguir" : "Elegí tu equipo…"}</option>` + equipos().slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+      .map((q) => `<option value="${esc(q.id)}" ${q.id === id ? "selected" : ""}>${esc(q.nombre)}</option>`).join("");
+    if (!e) return `<section class="mi vacio-mi"><label><b>Seguí a tu equipo</b><span>Te mostramos sus partidos acá arriba.</span><select class="sel" data-mi="1">${opts}</select></label></section>`;
+    const ps = partidos().filter((p) => p.local === id || p.visitante === id).sort(porFecha);
+    const ahora = ps.find(enVivo) || ps.find((p) => !jugado(p));
+    const ult = ps.filter(jugado).pop();
+    return `<section class="mi"><div class="mi-cab"><a href="#/equipo/${esc(id)}">${badge(e, "med")}<span><small>Tu equipo</small><b>${esc(e.nombre)}</b></span></a><select class="sel" data-mi="1">${opts}</select></div>
+      <div class="res-grid">${ahora ? marcador(ahora, { veedor: false }) : ""}${ult && ult !== ahora ? marcador(ult, { detalle: true }) : ""}${!ahora && !ult ? vacio("Todavía no hay partidos de tu equipo.") : ""}</div></section>`;
   }
 
   /* ---------------- vistas ---------------- */
@@ -438,6 +460,7 @@
     const hero = heroInicio(fechas, rango, canchas.length, sede);
     const sedeHtml = `<a class="sede" href="${esc(mapsLink())}" target="_blank" rel="noopener"><div><span class="kicker">¿Dónde se juega?</span><h3>${esc(sede.nombre || "Sede a confirmar")}</h3><p>${esc(sede.direccion || "")}</p></div><span class="link-oro">Cómo llegar ↗</span></a>`;
     return `${hero}
+      ${miEquipoHtml()}
       ${vivos.length ? `<h2 class="titulo-sec">En vivo ahora</h2><div class="res-grid">${vivos.map(tarjetaLista).join("")}</div>` : ""}
       <h2 class="titulo-sec">Últimos resultados</h2>
       ${ult.length ? `<div class="res-grid">${ult.map(tarjetaResultado).join("")}</div>` : vacio("Todavía no hay resultados cargados.")}
@@ -596,13 +619,8 @@
     if (estadoEst.tab === "goleadores") {
       const lista = rankear(goleadores(), (x) => x.goles + "|" + x.pj).filter((x) => x.rank <= 15).slice(0, 15);
       const max = lista.length ? lista[0].goles : 1;
-      const fila = (x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null; return { x, j, e }; };
-      const pod = lista.slice(0, 3).map(fila);
-      const orden = [pod[1], pod[0], pod[2]].filter(Boolean);
-      const podio = pod.length ? `<div class="podio">${orden.map(({ x, j, e }) => `<a class="pd p${pod.indexOf(orden.find((o) => o.x === x)) + 1}" href="#/jugador/${esc(x.id)}">
-          <span class="pd-rk">${x.rank}</span>${badge(e, "grande")}<b class="pd-n">${esc(j ? j.nombre : "?")}</b><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small><em>${x.goles}<u>goles</u></em></a>`).join("")}</div>` : "";
-      const resto = lista.slice(3).map((x) => { const { j, e } = fila(x); return `<li><span class="rk">${x.rank}</span><div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small></div>${barra(x.goles / max * 100)}<b>${x.goles}</b></li>`; }).join("");
-      cuerpo = lista.length ? podio + (resto ? `<ol class="rank barras">${resto}</ol>` : "") : vacio("Todavía no hay goles cargados.");
+      cuerpo = lista.length ? `<ol class="rank tally">${lista.map((x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null;
+        return `<li class="${x.rank <= 3 ? "top top" + x.rank : ""}"><span class="rk">${x.rank}</span>${badge(e, "chico")}<div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small></div>${palitos(x.goles)}<b>${x.goles}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay goles cargados.");
       nota = (D.estadisticasSoloZona ? "Cuenta solo la fase de zonas" : "Cuenta todo el torneo (zonas, cuartos, semis, final y 3er puesto)") + ". Los goles de las definiciones por penales no suman. Si empatan en goles, va primero el que jugó menos partidos; si siguen iguales, comparten el puesto.";
     } else if (estadoEst.tab === "valla") {
       const vr = rankear(valla(), (x) => x.prom.toFixed(6) + "|" + x.dist + "|" + x.gr).filter((x) => x.rank <= 10);
@@ -624,9 +642,9 @@
       nota = "La organización confirma cada sanción.";
     } else {
       const vs = veedoresStats(), max = vs.length ? Math.max(1, vs[0].partidos) : 1;
-      cuerpo = vs.length ? `<ol class="rank barras">${vs.map((x, i) => {
+      cuerpo = vs.length ? `<ol class="rank tally">${vs.map((x, i) => {
         const inf = veedorInfo(x.nombre), e = (inf && inf.equipo ? equipo(inf.equipo) : null) || equipo(x.eq);
-        return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${barra(x.partidos / max * 100)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
+        return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${palitos(x.partidos)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
       nota = "Cuenta los partidos que veedó cada uno (jugados o en vivo, sin los W.O.). Los que todavía no veedaron ninguno figuran con 0.";
     }
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
@@ -740,7 +758,19 @@
     });
     app.addEventListener("change", (ev) => {
       if (ev.target.matches("[data-eq]")) { estadoFx.eq = ev.target.value; render(true); }
+      if (ev.target.matches("[data-mi]")) { try { localStorage.setItem("copaMiEq", ev.target.value); } catch (e) { /* sin storage */ } render(true); }
     });
+    const ponerTema = () => {
+      const noche = document.documentElement.dataset.tema === "noche";
+      document.querySelectorAll("#tema span").forEach((x) => { x.textContent = noche ? "Modo claro" : "Modo noche"; });
+    };
+    ponerTema();
+    document.querySelectorAll("#tema,#tema2").forEach((b) => b.addEventListener("click", () => {
+      const nuevo = document.documentElement.dataset.tema === "noche" ? "dia" : "noche";
+      document.documentElement.dataset.tema = nuevo;
+      try { localStorage.setItem("copaTema", nuevo); } catch (e) { /* sin storage */ }
+      ponerTema();
+    }));
     window.addEventListener("hashchange", () => render(false));
     render(false);
     iniciarRemoto();
