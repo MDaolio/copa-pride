@@ -207,6 +207,7 @@ window.LIGA_DATA = {
     { id: "p119", nombre: "Eduardo Dillon", equipo: "e2", foto: "" },
     { id: "p120", nombre: "Fran Martin", equipo: "e2", foto: "" },
     { id: "p121", nombre: "Rodrigo Juan", equipo: "e2", foto: "" },
+    { id: "p341", nombre: "Nicolas Samaniego", equipo: "e2", foto: "", agregado: "2026-10-22" },   // agregado ya empezada la Copa (cupo 1 de 2)
     { id: "p122", nombre: "Fernando Torres", equipo: "e7", foto: "" },
     { id: "p123", nombre: "Victor Ramirez", equipo: "e8", foto: "" },
     { id: "p124", nombre: "Nahuel Tabares", equipo: "e8", foto: "" },
