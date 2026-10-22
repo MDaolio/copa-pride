@@ -12,7 +12,12 @@ datos = json.load(open(sys.argv[1] if len(sys.argv) > 1 else "/tmp/sh/data.json"
 EQ = {e["id"]: e for e in datos["eq"]}
 PL = {}
 for j in datos["pl"]:
-    PL.setdefault(j["equipo"], []).append(j["nombre"])
+    PL.setdefault(j["equipo"], []).append((j["id"], j["nombre"]))
+# Jugadores que ya jugaron al menos un partido (habilitados para la eliminatoria): su casilla JUGÓ sale en negro.
+YA = set()
+_f = os.path.join(AQUI, "ya_jugaron.json")
+if os.path.exists(_f):
+    for _l in json.load(open(_f, encoding="utf-8")).values(): YA.update(_l)
 
 ORO = HexColor("#C9A227"); NEGRO = HexColor("#111111"); GRIS = HexColor("#9a9a9a"); GRISCLARO = HexColor("#f1f1f1")
 W, H = landscape(A4)
@@ -59,12 +64,15 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
     for r in range(filas):
         yb = y - alto
         c.setLineWidth(0.4); c.setStrokeColor(GRIS); c.line(x0, yb, x0 + ancho, yb)
-        nom = jug[r] if r < len(jug) else ""
+        pid, nom = jug[r] if r < len(jug) else ("", "")
         c.setFillColor(black); c.setFont("Helvetica", 9 if len(nom) < 26 else 7.5)
         if nom: c.drawString(xs[1] + 1.5 * mm, yb + 2.2 * mm, nom)
         s = 4.2 * mm
         cy = yb + (alto - s) / 2
-        box(c, (xs[2] + xs[3]) / 2 - s / 2, cy)
+        if pid in YA:
+            c.setFillColor(black); c.setLineWidth(0.7); c.setStrokeColor(black); c.rect((xs[2] + xs[3]) / 2 - s / 2, cy, s, s, fill=1, stroke=1); c.setFillColor(black)
+        else:
+            box(c, (xs[2] + xs[3]) / 2 - s / 2, cy)
         bw = (xs[4] - xs[3]) - 4 * mm
         c.setLineWidth(0.7); c.setStrokeColor(black); c.rect(xs[3] + 2 * mm, yb + 0.9 * mm, bw, alto - 1.8 * mm, fill=0)
         for i in (4, 5, 6): box(c, (xs[i] + xs[i + 1]) / 2 - s / 2, cy)
@@ -130,7 +138,7 @@ def hoja(c, p):
     # instrucción
     c.setStrokeColor(black); c.setLineWidth(1.2); c.line(M, 8 * mm, W - M, 8 * mm)
     c.setFillColor(black); c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(W / 2, 3.8 * mm, "GOLES: palitos en el recuadro (la banda cierra el 5). TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro grande.")
+    c.drawCentredString(W / 2, 3.8 * mm, "JUGÓ en negro = ya jugó antes. GOLES: palitos (la banda cierra el 5). TARJETAS: pintá el casillero. El resultado final va en el recuadro grande.")
 
 def pdf(nombre, partidos):
     c = canvas.Canvas(os.path.join(AQUI, nombre), pagesize=landscape(A4))
