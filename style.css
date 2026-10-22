@@ -478,3 +478,31 @@ td.pts{font-weight:700;font-size:1rem;background:var(--hoja-2)}
 }
 @media (max-width:900px){.ed{grid-template-columns:1fr;gap:.4rem}.ed-anio{writing-mode:horizontal-tb;transform:none;font-size:3.6rem}.hist2{grid-template-columns:1fr}.barra{flex-basis:22%}.podio{gap:.4rem}.pd em{font-size:2rem}.pd .badge.grande{width:44px;height:44px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+
+/* ---------- Formas más suaves ---------- */
+.mt,.cab,.mi,.zona,.camp-card,.sede,.card,.eqf,.tarjeta,.celda.cruce,.ficha,.campeon,.pd,.rank li,.hc,.hf,.panel,.vacio,.eqz-z,.mas-panel{border-radius:16px}
+.mt,.cab,.zona,.celda.cruce,.sede,.ficha{overflow:hidden}
+.hf{border-radius:14px}
+.gl{border-radius:50%;width:2.7rem;min-width:2.7rem;height:2.7rem;padding:0;font-size:1.25rem}
+.fe .gl{width:2.2rem;min-width:2.2rem;height:2.2rem;font-size:1rem}
+.gl i{position:absolute;margin:2.1rem 0 0 1.9rem}
+.gl{position:relative}
+.chip,.btn,.tag,.cab-cuenta,.tema{border-radius:999px}
+.seg{border-radius:999px;overflow:hidden}
+.sel{border-radius:12px}
+.kicker::before{border-radius:50%}
+.titulo-pag::after{border-radius:4px}
+.barra,.barra b{border-radius:999px;clip-path:none}
+.rk,.rank .rk{border-radius:50%}
+.nav a.on{border-radius:0 999px 999px 0;margin-right:.9rem}
+.nav a{border-bottom-color:transparent}
+.zona-t em{border-radius:10px}
+.cnt{display:inline-flex;align-items:center;justify-content:center;min-width:1.5rem;height:1.5rem;padding:0 .3rem;border-radius:999px;background:var(--oro);color:#111;font-size:.78rem;font-weight:800;line-height:1}
+.det-v .cnt{order:-1}
+.mt-eq{border-radius:0}
+.tarj i{border-radius:8px;transform:none}
+.mt{border-left-width:6px}
+.q-oro,.q-plata{}
+.leyenda{border-radius:0}
+.foto{border-radius:14px}
+.aviso{border-radius:0}

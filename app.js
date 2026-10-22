@@ -319,7 +319,7 @@
         items.push({ tipo: "t", ico: iconoTarj(x), nom: j ? j.nombre : "?" });
       });
       return items.map((i) => i.tipo === "g"
-        ? `<li><span class="ic">⚽</span><span class="nm">${esc(i.nom)}${i.min ? ` <small>${esc(i.min)}'</small>` : ""}</span><span class="pal-s">${palitos(i.n)}</span></li>`
+        ? `<li><span class="ic">⚽</span><span class="nm">${esc(i.nom)}${i.min ? ` <small>${esc(i.min)}'</small>` : ""}</span>${i.n > 1 ? `<b class="cnt">${i.n}</b>` : ""}</li>`
         : `<li><span class="ic">${i.ico}</span><span class="nm">${esc(i.nom)}</span></li>`).join("");
     };
     const l = lado(p.local), v = lado(p.visitante);
