@@ -565,7 +565,9 @@
       cuerpo = horas.map((h) => `<section class="hora-blq"><div class="hora-n"><b>${esc(h)}</b></div><div class="res-grid">${visibles.filter((p) => p.hora === h).sort((a, b) => natural(a.cancha, b.cancha)).map((p) => marcador(p, { sin: "hora", veedor: true, detalle: true })).join("")}</div></section>`).join("");
     }
 
-    return `<p class="kicker">${esc(D.horario || "")}</p><h2 class="titulo-pag">Fixture</h2>
+    const jugDia = delDia.filter(jugado);
+    const res = resumen([[delDia.length, "partidos del día"], [jugDia.length, "jugados"], [jugDia.reduce((s, p) => s + (p.golesLocal || 0) + (p.golesVisitante || 0), 0), "goles"], [[...new Set(delDia.map((p) => p.cancha))].length, "canchas"]]);
+    return `<p class="kicker">${esc(D.horario || "")}</p><h2 class="titulo-pag">Fixture</h2>${res}
       <div class="ctrl"><div class="filtros">${tabs}</div><div class="seg">${seg}</div><select class="sel" data-eq="1">${opts}</select></div>${cuerpo}`;
   }
 
@@ -583,12 +585,14 @@
           <td class="izq"><a class="celda-eq" href="#/equipo/${esc(f.id)}">${badge(e, "chico")}<span>${esc(e.nombre)}</span>${paisTag(e)}${cabezaTag(e)}</a></td>
           <td>${f.pj}</td><td>${f.pg}</td><td>${f.pe}</td><td>${f.pp}</td><td>${f.gf}</td><td>${f.gc}</td><td>${signo(f.dg)}</td><td>${f.ro}-${f.am}-${f.az}</td><td class="pts">${f.pts}</td></tr>`;
       }).join("");
-      return `<section class="zona"><h3 class="zona-t"><span>ZONA</span><em>${esc(z)}</em></h3><div class="tabla-wrap"><table>
+      return `<section class="zona-b"><h3 class="ag-z">Zona ${esc(z)}</h3><div class="zona"><div class="tabla-wrap"><table>
         <thead><tr><th>#</th><th class="izq">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>FP</th><th>Pts</th></tr></thead>
-        <tbody>${filas}</tbody></table></div></section>`;
+        <tbody>${filas}</tbody></table></div></div></section>`;
     }).join("");
 
     return `<div class="zonas-cab"><div><p class="kicker">Fase de grupos</p><h2 class="titulo-pag">Zonas</h2></div><div class="leyendas">${leyenda}</div></div>
+      ${(() => { const j = partidos().filter((p) => p.fase === "Zona" && jugado(p)), t = partidos().filter((p) => p.fase === "Zona").length;
+        return resumen([[equipos().length, "equipos"], [`${j.length}<small>/${t}</small>`, "partidos jugados"], [j.reduce((s, p) => s + (p.golesLocal || 0) + (p.golesVisitante || 0), 0), "goles"]]); })()}
       <div class="zonas-grid">${bloques}</div>
       <p class="leyenda">Desempate: puntos · diferencia de gol · fair play (menos rojas, después amarillas, después azules) · orden alfabético. La columna FP muestra rojas-amarillas-azules.</p>`;
   }
@@ -630,14 +634,22 @@
 
   function vistaEquipos() {
     if (!equipos().length) return vacio("Todavía no hay equipos cargados.");
-    return `<p class="kicker">${equipos().length} equipos · ${zonas().length} zonas</p><h2 class="titulo-pag">Equipos participantes</h2>` + zonas().map((z) =>
-      `<section class="eqz"><div class="eqz-z"><span>ZONA</span><em>${esc(z)}</em></div><div class="eqz-l">` + equipos().filter((e) => e.zona === z).map((e) => {
-        const nj = jugadores().filter((j) => j.equipo === e.id).length;
-        return `<a class="eqf" href="#/equipo/${esc(e.id)}">${badge(e, "med")}<div class="eqf-t"><h3>${esc(e.nombre)}</h3><p>${e.cabeza ? "Cabeza de serie " + esc(e.cabeza) + " · " : ""}${esc(e.pais || "")}${e.pais ? " · " : ""}${nj} jugadores</p></div><span class="eqf-f">→</span></a>`;
-      }).join("") + `</div></section>`).join("");
+    const nj = jugadores().length;
+    const fila = (e) => {
+      const n = jugadores().filter((j) => j.equipo === e.id).length;
+      return `<li class="ag-eq" style="--c1:${esc(colorVivo(e))}"><a class="ag-fila" href="#/equipo/${esc(e.id)}">${badge(e, "chico")}
+        <span class="ag-nom">${esc(e.nombre)}${e.cabeza ? ` <em class="ag-cab">★ ${esc(e.cabeza)}</em>` : ""}</span>
+        <span class="ag-meta">${n} jugadores</span><span class="ag-ir">→</span></a></li>`;
+    };
+    return `<p class="kicker">Copa ${esc(D.edicion || "")}</p><h2 class="titulo-pag">Equipos participantes</h2>
+      ${resumen([[equipos().length, "equipos"], [zonas().length, "zonas"], [nj, "jugadores"]])}
+      <div class="ag-zonas">${zonas().map((z) => `<section><h3 class="ag-z">Zona ${esc(z)}</h3><ul>${equipos().filter((e) => e.zona === z).map(fila).join("")}</ul></section>`).join("")}</div>
+      <p class="ag-nota">★ cabeza de serie</p>`;
   }
 
+
   /* ---------------- agregados (cupos de jugadores sumados con la Copa empezada) ---------------- */
+  const resumen = (items) => `<div class="ag-res">${items.filter(Boolean).map(([n, t]) => `<div><strong>${n}</strong><span>${esc(t)}</span></div>`).join("")}</div>`;
   const cupoAgregados = () => (D.cupoAgregados != null ? D.cupoAgregados : 2);
   // El color más claro del equipo, para que el filo de la tarjeta se vea sobre fondo negro.
   const colorVivo = (e) => (e.colores || ["#c8932a"]).slice().sort((x, y) => luz(y) - luz(x))[0];
@@ -660,7 +672,7 @@
     };
     return `<p class="kicker">Copa ${esc(D.edicion || "")} · Listas de buena fe</p><h2 class="titulo-pag">Cupos de agregados</h2>
       <p class="ag-regla">Una vez empezada la Copa, cada equipo puede sumar <b>${C} jugadores más</b> en todo el torneo. Acá se ve cuántos usó cada uno.</p>
-      <div class="ag-res"><div><strong>${todos.length}</strong><span>agregados</span></div><div><strong>${conAg}</strong><span>equipos con agregados</span></div><div><strong>${llenos}</strong><span>sin cupo</span></div></div>
+      ${resumen([[todos.length, "agregados"], [conAg, "equipos con agregados"], [llenos, "sin cupo"]])}
       <div class="ag-zonas">${zonas().map((z) => `<section><h3 class="ag-z">Zona ${esc(z)}</h3><ul>${equipos().filter((e) => e.zona === z).map(tarjeta).join("")}</ul></section>`).join("")}</div>`;
   }
 
@@ -763,7 +775,10 @@
     const S = [["goleadores", "Goleadores"], ["valla", "Valla menos vencida"], ["fairplay", "Fair play"], ["mvp", "Jugador del partido"], ["suspendidos", "Suspendidos"], ["veedores", "Veedores"]];
     const sec = Object.fromEntries(S.map(([k, t]) => { const r = estSeccion(k); return [k, `<section class="est-sec" id="est-${k}"><h3 class="titulo-sec">${t}</h3><div class="est-cuerpo">${r.cuerpo}<p class="leyenda">${r.nota}</p></div></section>`]; }));
     const ir = S.map(([k, t]) => `<button class="chip" data-ir="est-${k}">${t}</button>`).join("");
+    const jug = partidos().filter(jugado), gl = jug.reduce((s, p) => s + (p.golesLocal || 0) + (p.golesVisitante || 0), 0);
+    const tj = partidos().reduce((s, p) => s + ((p.tarjetas || []).length), 0);
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
+      ${resumen([[gl, "goles"], [jug.length, "partidos jugados"], [jug.length ? (gl / jug.length).toFixed(1).replace(".", ",") : "0", "goles por partido"], [tj, "tarjetas"]])}
       ${sec.goleadores}
       <div class="est-duo">${sec.valla}${sec.fairplay}</div>
       <div class="est-duo">${sec.mvp}${sec.veedores}</div>

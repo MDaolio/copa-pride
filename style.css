@@ -728,3 +728,39 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 .ag-quien a:hover{color:var(--tinta)}
 .ag-estado{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--vivo)}
 @media (max-width:560px){.ag-res{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}.ag-res div{flex-direction:column;gap:.15rem}.ag-res span{font-size:.68rem}}
+
+/* ======================= ESTILO AGREGADOS EN TODA LA PÁGINA =======================
+   Tarjetas planas y prolijas: borde fino, filo de color a la izquierda, esquinas casi rectas,
+   títulos de zona en dorado espaciado y cifras en fila. */
+.ag-res strong small{font-size:1.2rem;color:var(--tinta-2)}
+.ag-nota{color:var(--tinta-2);font-size:.78rem;margin-top:1rem}
+.ag-meta{color:var(--tinta-2);font-size:.78rem;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.ag-ir{color:var(--oro-t);flex:0 0 auto;transition:transform .12s}
+.ag-cab{font-style:normal;color:var(--oro-t);font-size:.74rem;font-weight:700;margin-left:.25rem;white-space:nowrap}
+.ag-eq{transition:background .12s}
+.ag-eq:hover{background:var(--hoja-2)}
+.ag-eq:hover .ag-ir{transform:translateX(3px)}
+.ag-eq .badge.chico{width:30px;height:30px}
+
+/* Esquinas casi rectas y bordes finos en todas las tarjetas */
+.mt,.cab,.mi,.zona,.camp-card,.sede,.card,.eqf,.tarjeta,.celda.cruce,.ficha,.campeon,.pd,.rank li,.hc,.hf,.panel,.vacio,.mas-panel,.cifra,.sede2,.foto,.cd-t>div,.sel{border-radius:4px}
+.mt,.tarjeta,.zona,.ficha,.campeon,.pd,.panel,.card,.camp-card,.hc,.hf{border-width:1px;border-color:var(--linea)}
+.mt{border-left-width:4px}
+.mt.fin{border-left-color:var(--oro-t)}
+
+/* Zonas: título dorado arriba de cada tabla, sin la caja grande */
+.zona-b .ag-z{margin-bottom:.5rem}
+.zona{border:1px solid var(--linea)}
+
+/* Cifras de Inicio con el mismo aire que el resumen */
+.cifra{background:var(--hoja);border:1px solid var(--linea);border-left:4px solid var(--oro-t)}
+.cifra::after{display:none}
+
+/* Listas de estadísticas: filas planas como las tarjetas de agregados */
+.rank li{background:var(--hoja);border:1px solid var(--linea);border-left:4px solid var(--oro-osc)}
+.rank li:first-child{border-left-color:var(--oro-t)}
+.podio .pd{border-left:4px solid var(--oro-osc)}
+
+/* Jugadores del plantel */
+.tarjeta{border-left:4px solid var(--oro-osc)}
+.tarjeta:hover{transform:none;box-shadow:none;background:var(--hoja-2);border-left-color:var(--oro-t)}
