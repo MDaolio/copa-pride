@@ -882,34 +882,25 @@
     return h;
   }
 
-  /* Mascotas del festejo: dibujos originales en SVG, por id de equipo.
-     Aguará Guazú (e1): un aguará guazú caricatura que entra corriendo y se sienta.
-     Para sumar el perro de Dogos (e5) alcanza con agregar su dibujo acá. */
-  const AGUARA_SVG = `<svg viewBox="0 0 120 160" aria-hidden="true">
-    <g class="m-cola"><path d="M84 132 C108 128 114 104 106 86 C102 78 96 80 98 88 C102 102 96 118 80 122 Z" fill="#c4581f"/>
-      <path d="M106 86 C102 78 96 80 98 88 C99 92 100 95 100 99 C106 97 109 92 106 86 Z" fill="#fff8ec"/></g>
-    <ellipse cx="60" cy="116" rx="27" ry="31" fill="#d2692a"/>
-    <ellipse cx="38" cy="138" rx="13" ry="12" fill="#c4581f"/><ellipse cx="82" cy="138" rx="13" ry="12" fill="#c4581f"/>
-    <ellipse cx="33" cy="152" rx="10" ry="5" fill="#1b120c"/><ellipse cx="87" cy="152" rx="10" ry="5" fill="#1b120c"/>
-    <path d="M40 92 C46 80 74 80 80 92 C74 88 66 87 60 90 C54 87 46 88 40 92 Z" fill="#1b120c"/>
-    <ellipse cx="60" cy="104" rx="11" ry="15" fill="#fff8ec"/>
-    <rect x="47" y="104" width="9" height="49" rx="4.5" fill="#1b120c"/><rect x="64" y="104" width="9" height="49" rx="4.5" fill="#1b120c"/>
-    <ellipse cx="51" cy="153" rx="7" ry="4" fill="#1b120c"/><ellipse cx="69" cy="153" rx="7" ry="4" fill="#1b120c"/>
-    <g class="m-oreja-i"><path d="M44 52 L30 10 L58 40 Z" fill="#c4581f"/><path d="M44 47 L34 18 L53 39 Z" fill="#fff1dc"/></g>
-    <g class="m-oreja-d"><path d="M76 52 L90 10 L62 40 Z" fill="#c4581f"/><path d="M76 47 L86 18 L67 39 Z" fill="#fff1dc"/></g>
-    <ellipse cx="60" cy="58" rx="24" ry="20" fill="#d2692a"/>
-    <path d="M48 64 C50 84 70 84 72 64 C66 70 54 70 48 64 Z" fill="#fff1dc"/>
-    <path d="M50 74 C54 86 66 86 70 74 C66 79 54 79 50 74 Z" fill="#1b120c"/>
-    <ellipse cx="60" cy="68" rx="5.5" ry="4" fill="#1b120c"/><ellipse cx="58.5" cy="66.8" rx="1.6" ry="1" fill="#fff" opacity=".7"/>
-    <path d="M55 76 Q60 81 65 76" stroke="#fff1dc" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <g class="m-ojos"><ellipse cx="50" cy="55" rx="4" ry="5" fill="#1b120c"/><ellipse cx="70" cy="55" rx="4" ry="5" fill="#1b120c"/>
-      <circle cx="51.4" cy="53.4" r="1.5" fill="#fff"/><circle cx="71.4" cy="53.4" r="1.5" fill="#fff"/></g>
-    <ellipse cx="44" cy="64" rx="3.5" ry="2" fill="#ff8f8f" opacity=".55"/><ellipse cx="76" cy="64" rx="3.5" ry="2" fill="#ff8f8f" opacity=".55"/>
-  </svg>`;
-  const MASCOTAS = { e1: AGUARA_SVG };
+  /* Mascotas del festejo (dibujos en mascotas.js): entra corriendo con estela de viento,
+     pasa por detrás del escudo y se sienta a la derecha mirando de frente. */
+  const MASCOTAS = window.MASCOTAS_COPA || {};
   function mascotaHtml(e) {
-    const svg = e && MASCOTAS[e.id];
-    return svg ? `<div class="gfx-masc"><div class="gfx-masc-salto">${svg}</div></div>` : "";
+    const m = e && MASCOTAS[e.id];
+    if (!m) return "";
+    let polvo = "";
+    for (let i = 0; i < 9; i++) {
+      const x = -8 + i * 8.5;                       // por dónde va pasando la carrera (en % del ancho)
+      const t = (0.2 + 1.25 * (x + 52) / 116).toFixed(2); // cuándo pasa por ahí
+      polvo += `<i style="left:${x}%;animation-delay:${t}s;--s:${(0.7 + Math.random() * 0.6).toFixed(2)}"></i>`;
+    }
+    let brillos = "";
+    for (let i = 0; i < 6; i++) brillos += `<i style="--a:${i * 60 + Math.round(Math.random() * 20)}deg;animation-delay:${(1.5 + i * 0.04).toFixed(2)}s">${i % 2 ? "✦" : "♥"}</i>`;
+    return `<div class="gfx-masc" style="--brisa:${m.brisa || "#fff"}">
+      <div class="mc-polvo">${polvo}</div>
+      <div class="mc-carrera"><div class="mc-brisa"><i></i><i></i><i></i><i></i><i></i></div><div class="mc-corre">${m.corre}</div></div>
+      <div class="mc-sentado"><div class="mc-poof"></div><div class="mc-brillos">${brillos}</div><div class="mc-sienta">${m.sienta}</div></div>
+    </div>`;
   }
 
   function festejarUno(ev) {
@@ -952,7 +943,11 @@
   }
   function demoGol() {
     // Simulación: un gol en el primer resultado y, después, uno en el de al lado.
-    const cards = [...document.querySelectorAll(".mt.fin[data-id]")].slice(0, 2);
+    // Primero los partidos de equipos con mascota (para mostrar los dibujos); si no hay, los dos primeros.
+    const todas = [...document.querySelectorAll(".mt.fin[data-id]")];
+    const tieneMasc = (c) => { const p = partidos().find((x) => x.id === c.dataset.id); return p && (MASCOTAS[p.local] || MASCOTAS[p.visitante]); };
+    const vistos = new Set();
+    const cards = [...todas.filter(tieneMasc), ...todas].filter((c) => !vistos.has(c.dataset.id) && vistos.add(c.dataset.id)).slice(0, 2);
     const lista = cards.map((c) => {
       const p = partidos().find((x) => x.id === c.dataset.id);
       // Si juega un equipo con mascota, el gol de la demo es de ese equipo, así se ve el dibujo.

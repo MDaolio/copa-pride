@@ -646,22 +646,57 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 .gfx-m b{font-family:var(--display);font-weight:400;font-size:1.3rem}
 .gfx-conf{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
 .gfx-conf i{position:absolute;top:-14px;border-radius:2px;opacity:0;animation:cae 2.6s ease-in both}
-/* Mascota del festejo (aguará): entra corriendo por detrás del escudo y se sienta a la derecha */
-.gfx-masc{position:absolute;z-index:1;right:3%;bottom:0;height:92%;max-height:150px;aspect-ratio:3/4;pointer-events:none;animation:mascCorre 1.25s cubic-bezier(.3,.7,.3,1) .2s both}
-.gfx-masc-salto{width:100%;height:100%;transform-origin:50% 100%;animation:mascSalto .19s ease-in-out .2s 6 alternate,mascSienta .45s ease-out 1.45s forwards}
-.gfx-masc svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
-.gfx-masc .m-cola{transform-box:fill-box;transform-origin:0% 100%;animation:mascCola .32s ease-in-out 1.6s infinite alternate}
-.gfx-masc .m-oreja-i{transform-box:fill-box;transform-origin:80% 100%;animation:mascOreja 1.4s ease-in-out 1.8s infinite}
-.gfx-masc .m-oreja-d{transform-box:fill-box;transform-origin:20% 100%;animation:mascOreja 1.4s ease-in-out 2.5s infinite reverse}
-.gfx-masc .m-ojos{transform-box:fill-box;transform-origin:50% 50%;animation:mascParpadea 2.2s linear 1.9s infinite}
-@keyframes mascCorre{from{transform:translateX(-60vw)}to{transform:none}}
-@keyframes mascSalto{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-12%) rotate(5deg)}}
-@keyframes mascSienta{0%{transform:scale(1.06,.9)}55%{transform:scale(.97,1.04)}100%{transform:none}}
-@keyframes mascCola{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
-@keyframes mascOreja{0%,70%,100%{transform:none}80%{transform:rotate(-12deg)}90%{transform:rotate(6deg)}}
-@keyframes mascParpadea{0%,90%,100%{transform:none}94%{transform:scaleY(.1)}}
+/* Mascota del festejo: corre con estela por detrás del escudo y se sienta a la derecha */
+.gfx-masc{position:absolute;inset:0;z-index:1;pointer-events:none}
+.mc-carrera{position:absolute;bottom:3%;height:60%;max-height:140px;aspect-ratio:200/140;left:-52%;animation:mcCorre 1.25s linear .2s both,mcSeVa .14s linear 1.42s forwards}
+.mc-corre{width:100%;height:100%;animation:mcGalope .3s ease-in-out infinite}
+.mc-corre svg,.mc-sienta svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.mc-pata{transform-box:fill-box;transform-origin:50% 4%}
+.p-del-cerca,.p-tras-lejos{animation:mcPataA .3s ease-in-out infinite}
+.p-del-lejos,.p-tras-cerca{animation:mcPataB .3s ease-in-out infinite}
+.mc-cola-corre{transform-box:fill-box;transform-origin:100% 50%;animation:mcColaVuela .15s ease-in-out infinite alternate}
+.mc-cabeza-corre{transform-box:fill-box;transform-origin:20% 80%;animation:mcCabeceo .3s ease-in-out infinite}
+.mc-lengua{transform-box:fill-box;transform-origin:50% 0;animation:mcLengua .3s ease-in-out infinite}
+.mc-brisa{position:absolute;right:62%;top:12%;width:90%;height:70%}
+.mc-brisa i{position:absolute;right:0;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--brisa));opacity:0;animation:mcViento .38s ease-out infinite}
+.mc-brisa i:nth-child(1){top:8%;width:70%;animation-delay:.2s}
+.mc-brisa i:nth-child(2){top:30%;width:100%;height:4px;animation-delay:.3s}
+.mc-brisa i:nth-child(3){top:50%;width:80%;animation-delay:.25s}
+.mc-brisa i:nth-child(4){top:70%;width:95%;height:4px;animation-delay:.35s}
+.mc-brisa i:nth-child(5){top:90%;width:60%;animation-delay:.28s}
+.mc-polvo i{position:absolute;bottom:3%;width:20px;height:20px;margin-left:12%;border-radius:50%;background:radial-gradient(circle,var(--brisa) 0,rgba(255,255,255,.35) 45%,transparent 70%);opacity:0;animation:mcPolvo .9s ease-out both}
+.mc-sentado{position:absolute;right:3%;bottom:0;height:92%;max-height:150px;aspect-ratio:3/4;opacity:0;animation:mcAparece .01s linear 1.5s forwards}
+.mc-sienta{width:100%;height:100%;transform-origin:50% 100%;animation:mcAterriza .55s cubic-bezier(.3,1.6,.5,1) 1.5s both,mcRespira 1.6s ease-in-out 2.1s infinite}
+.mc-sienta .mc-cabeza{transform-box:fill-box;transform-origin:50% 95%;animation:mcLadea 2.4s ease-in-out 2s infinite}
+.mc-sienta .mc-cola{transform-box:fill-box;transform-origin:0% 100%;animation:mcCola .28s ease-in-out 1.7s infinite alternate}
+.mc-sienta .mc-oreja-i{transform-box:fill-box;transform-origin:80% 100%;animation:mcOreja 1.6s ease-in-out 1.9s infinite}
+.mc-sienta .mc-oreja-d{transform-box:fill-box;transform-origin:20% 100%;animation:mcOreja 1.6s ease-in-out 2.6s infinite reverse}
+.mc-sienta .mc-ojos{transform-box:fill-box;transform-origin:50% 50%;animation:mcParpadea 2.2s linear 2.2s infinite}
+.mc-poof{position:absolute;left:-15%;right:-15%;bottom:-4%;height:30%;border-radius:50%;background:radial-gradient(ellipse,var(--brisa) 0,rgba(255,255,255,.4) 40%,transparent 70%);opacity:0;animation:mcPoof .6s ease-out 1.48s both}
+.mc-brillos{position:absolute;left:50%;top:38%;width:0;height:0}
+.mc-brillos i{position:absolute;font-style:normal;font-size:15px;line-height:1;color:#fff;text-shadow:0 0 6px #ffd27a;opacity:0;transform:translate(-50%,-50%);animation:mcBrillo 1s ease-out both}
+.mc-brillos i:nth-child(odd){color:#ff7b93;font-size:17px}
+@keyframes mcCorre{from{left:-52%}to{left:62%}}
+@keyframes mcSeVa{to{opacity:0}}
+@keyframes mcGalope{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-9%) rotate(-3deg)}}
+@keyframes mcPataA{0%,100%{transform:rotate(38deg)}50%{transform:rotate(-34deg)}}
+@keyframes mcPataB{0%,100%{transform:rotate(-34deg)}50%{transform:rotate(38deg)}}
+@keyframes mcColaVuela{from{transform:rotate(-8deg) scaleX(1)}to{transform:rotate(8deg) scaleX(1.06)}}
+@keyframes mcCabeceo{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}
+@keyframes mcLengua{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(16deg)}}
+@keyframes mcViento{0%{opacity:0;transform:translateX(30%) scaleX(.4)}35%{opacity:.85}100%{opacity:0;transform:translateX(-40%) scaleX(1)}}
+@keyframes mcPolvo{0%{opacity:0;transform:scale(.3)}20%{opacity:.9}100%{opacity:0;transform:translate(-22px,-26px) scale(calc(2.4 * var(--s)))}}
+@keyframes mcAparece{to{opacity:1}}
+@keyframes mcAterriza{0%{transform:translateY(-14%) scale(.92,1.08)}45%{transform:translateY(0) scale(1.14,.84)}75%{transform:scale(.96,1.05)}100%{transform:none}}
+@keyframes mcRespira{0%,100%{transform:none}50%{transform:scale(1.02,.985)}}
+@keyframes mcLadea{0%,100%{transform:rotate(0)}30%{transform:rotate(-7deg)}60%{transform:rotate(4deg)}}
+@keyframes mcCola{from{transform:rotate(-12deg)}to{transform:rotate(16deg)}}
+@keyframes mcOreja{0%,70%,100%{transform:none}80%{transform:rotate(-12deg)}90%{transform:rotate(6deg)}}
+@keyframes mcParpadea{0%,90%,100%{transform:none}94%{transform:scaleY(.1)}}
+@keyframes mcPoof{0%{opacity:0;transform:scale(.4)}30%{opacity:.9}100%{opacity:0;transform:scale(1.5,1.2)}}
+@keyframes mcBrillo{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-70px) rotate(calc(-1 * var(--a))) scale(1.1)}}
 @keyframes cae{0%{opacity:0;transform:translateY(0) rotate(0)}10%{opacity:1}100%{opacity:1;transform:translateY(330px) rotate(var(--r))}}
 .gfx-toast{position:fixed;inset:auto 1rem 5.2rem auto;width:min(92vw,440px);height:185px;border-radius:18px;border:2px solid var(--oro-t);z-index:300;box-shadow:0 18px 50px rgba(0,0,0,.6)}
 @media (min-width:901px){.gfx-toast{inset:auto 1.4rem 1.4rem auto}}
-@media (max-width:560px){.gfx-esc .badge.grande{width:72px;height:72px}.gfx-t strong{font-size:2.8rem}.gfx-eq{font-size:1.3rem}.gfx-masc{height:52%;right:0}}
-@media (prefers-reduced-motion:reduce){.gfx-esc,.gfx-t strong,.gfx-masc,.gfx-masc *{animation:none!important}.gfx-conf{display:none}}
+@media (max-width:560px){.gfx-esc .badge.grande{width:72px;height:72px}.gfx-t strong{font-size:2.8rem}.gfx-eq{font-size:1.3rem}.mc-carrera{height:46%}.mc-sentado{height:56%;right:0}.mc-brillos i{font-size:12px}}
+@media (prefers-reduced-motion:reduce){.gfx-esc,.gfx-t strong,.gfx-masc *{animation:none!important}.mc-carrera,.mc-polvo,.mc-brisa,.mc-poof,.mc-brillos{display:none}.mc-sentado{opacity:1}.gfx-conf{display:none}}
