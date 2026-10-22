@@ -41,7 +41,7 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
             pass
     c.drawString(tx, ytop - 6.3 * mm, nombre.upper())
     # columnas
-    cols = [("Nº", 9), ("Nombre y apellido", 49), ("JUGÓ", 11), ("GOLES (nº)", 29), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
+    cols = [("Nº", 9), ("Nombre y apellido", 49), ("JUGÓ", 11), ("GOLES (palitos)", 29), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
     tot = sum(w for _, w in cols); esc_f = ancho / mm / tot
     xs = [x0]
     for _, w in cols: xs.append(xs[-1] + w * esc_f * mm)
@@ -91,11 +91,13 @@ def hoja(c, p):
     c.drawString(M + 32 * mm, H - 18.5 * mm, "Copa Pride 2026 · By Liga Pride · Juntxs por el deporte")
     # datos del partido (derecha)
     fecha = FECHAS.get(p["fecha"], p["fase"]); dia = DIAS.get(p["fecha"], p["fecha"])
-    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 26); c.drawRightString(W - M, H - 12 * mm, p["id"].upper())
+    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 13)
+    c.drawRightString(W - M, H - 9 * mm, (nombre_equipo(local) + "  vs  " + nombre_equipo(visit)).upper())
     c.setFillColor(white); c.setFont("Helvetica-Bold", 10)
     zona = ("Zona " + p["zona"] + " · ") if p.get("zona") else ""
-    c.drawRightString(W - M, H - 17.5 * mm, f"{fecha} · {dia} · {p['hora']} hs · {p['cancha']}")
-    c.setFont("Helvetica", 8.5); c.drawRightString(W - M, H - 21.5 * mm, zona + "Código de partido: " + p["id"])
+    c.drawRightString(W - M, H - 14.5 * mm, f"{zona}{fecha} · {dia} · {p['hora']} hs · {p['cancha']}")
+    c.setFont("Helvetica-Bold", 10); c.drawRightString(W - M - 62 * mm, H - 20.5 * mm, "Veedor/a:")
+    c.setStrokeColor(white); c.setLineWidth(0.7); c.line(W - M - 60 * mm, H - 21 * mm, W - M, H - 21 * mm)
     # tablas
     gap = 6 * mm; ancho = (W - 2 * M - gap) / 2
     ytop = H - 24 * mm - 3 * mm
@@ -127,7 +129,7 @@ def hoja(c, p):
     # instrucción
     c.setFillColor(ORO); c.rect(0, 0, W, 7 * mm, fill=1, stroke=0)
     c.setFillColor(black); c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(W / 2, 2.4 * mm, "GOLES: escribí el NÚMERO (ej. 2), no rayitas. TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro negro.")
+    c.drawCentredString(W / 2, 2.4 * mm, "GOLES: palitos en el recuadro (la banda cierra el 5). TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro negro.")
 
 def pdf(nombre, partidos):
     c = canvas.Canvas(os.path.join(AQUI, nombre), pagesize=landscape(A4))
