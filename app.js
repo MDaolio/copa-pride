@@ -521,7 +521,6 @@
         <span class="btn sec sede2-b">Cómo llegar ↗</span></div></a>`;
     return `${hero}
       ${miEquipoHtml()}
-      ${cifrasHtml(ps)}
       ${vivos.length ? `<h2 class="titulo-sec">En vivo ahora</h2><div class="res-grid">${vivos.map(tarjetaLista).join("")}</div>` : ""}
       <h2 class="titulo-sec">Últimos resultados</h2>
       ${ult.length ? `<div class="res-grid">${ult.map(tarjetaResultado).join("")}</div>` : vacio("Todavía no hay resultados cargados.")}
