@@ -637,6 +637,33 @@
       }).join("") + `</div></section>`).join("");
   }
 
+  /* ---------------- agregados (cupos de jugadores sumados con la Copa empezada) ---------------- */
+  const cupoAgregados = () => (D.cupoAgregados != null ? D.cupoAgregados : 2);
+  // El color más claro del equipo, para que el filo de la tarjeta se vea sobre fondo negro.
+  const colorVivo = (e) => (e.colores || ["#c8932a"]).slice().sort((x, y) => luz(y) - luz(x))[0];
+  const luz = (h) => { const n = parseInt(String(h).replace("#", ""), 16) || 0; return ((n >> 16) & 255) * .3 + ((n >> 8) & 255) * .59 + (n & 255) * .11; };
+  const agregadosDe = (id) => jugadores().filter((j) => j.equipo === id && j.agregado);
+  function vistaAgregados() {
+    if (!equipos().length) return vacio("Todavía no hay equipos cargados.");
+    const C = cupoAgregados();
+    const todos = jugadores().filter((j) => j.agregado);
+    const conAg = equipos().filter((e) => agregadosDe(e.id).length).length;
+    const llenos = equipos().filter((e) => agregadosDe(e.id).length >= C).length;
+    const tarjeta = (e) => {
+      const ag = agregadosDe(e.id), n = ag.length, full = n >= C;
+      let pips = ""; for (let i = 0; i < C; i++) pips += `<i class="ag-pip${i < n ? " on" : ""}"></i>`;
+      return `<li class="ag-eq${full ? " full" : ""}" style="--c1:${esc(colorVivo(e))}">
+        <a class="ag-fila" href="#/equipo/${esc(e.id)}">${badge(e, "chico")}<span class="ag-nom">${esc(e.nombre)}</span>
+          <span class="ag-cup" aria-label="${n} de ${C} cupos usados">${pips}<b>${n}/${C}</b></span></a>
+        ${n ? `<div class="ag-quien">${ag.map((j) => `<a href="#/jugador/${esc(j.id)}">${esc(j.nombre)}</a>`).join("")}</div>` : ""}
+        ${full ? `<div class="ag-estado">${n > C ? "Se pasó del cupo" : "Sin cupo disponible"}</div>` : ""}</li>`;
+    };
+    return `<p class="kicker">Copa ${esc(D.edicion || "")} · Listas de buena fe</p><h2 class="titulo-pag">Cupos de agregados</h2>
+      <p class="ag-regla">Una vez empezada la Copa, cada equipo puede sumar <b>${C} jugadores más</b> en todo el torneo. Acá se ve cuántos usó cada uno.</p>
+      <div class="ag-res"><div><strong>${todos.length}</strong><span>agregados</span></div><div><strong>${conAg}</strong><span>equipos con agregados</span></div><div><strong>${llenos}</strong><span>sin cupo</span></div></div>
+      <div class="ag-zonas">${zonas().map((z) => `<section><h3 class="ag-z">Zona ${esc(z)}</h3><ul>${equipos().filter((e) => e.zona === z).map(tarjeta).join("")}</ul></section>`).join("")}</div>`;
+  }
+
   function fotoGrande(j) {
     if (j && j.foto) return `<img class="foto" src="${esc(j.foto)}" alt="${esc(j.nombre)}">`;
     return `<span class="badge grande" style="margin:0 auto .6rem;display:flex">${esc(iniciales(j ? j.nombre : "?"))}</span>`;
@@ -652,7 +679,7 @@
     const part = partidos().filter((p) => p.local === id || p.visitante === id).sort(porFecha).map(tarjetaLista).join("");
     return `<a class="volver" href="#/equipos">← Equipos</a>
       <div class="ficha">${badge(e, "grande")}<div><h2>${esc(e.nombre)}</h2>
-      <p>${e.zona ? "Zona " + esc(e.zona) : ""}${e.pais ? " · " + esc(e.pais) : ""}${f ? ` · ${f.pts} pts · ${f.pj} PJ · DG ${signo(f.dg)}` : ""}</p></div></div>
+      <p>${e.zona ? "Zona " + esc(e.zona) : ""}${e.pais ? " · " + esc(e.pais) : ""}${f ? ` · ${f.pts} pts · ${f.pj} PJ · DG ${signo(f.dg)}` : ""} · <a href="#/agregados">Agregados ${agregadosDe(id).length}/${cupoAgregados()}</a></p></div></div>
       <h2 class="titulo-sec">Plantel</h2>${plantel.length ? `<div class="grid">${jug}</div>` : vacio("Sin jugadores cargados.")}
       <h2 class="titulo-sec">Partidos</h2>${part ? `<div class="res-grid">${part}</div>` : vacio("Sin partidos.")}`;
   }
@@ -825,6 +852,7 @@
       case "jugador": html = vistaJugador(arg); break;
       case "estadisticas": html = vistaEstadisticas(); break;
       case "historial": html = vistaHistorial(); break;
+      case "agregados": html = vistaAgregados(); break;
       case "demo-gol": html = vistaInicio(); esperarIntro(demoGol); break;
       default: html = vistaInicio();
     }
@@ -835,7 +863,7 @@
     const activa = { equipo: "equipos", jugador: "equipos", "demo-gol": "inicio" }[pagina] || pagina || "inicio";
     document.querySelectorAll("#nav a, #tabbar a").forEach((a) => a.classList.toggle("on", a.dataset.p === activa));
     const mas = document.getElementById("mas");
-    if (mas) { mas.open = false; mas.classList.toggle("on", ["equipos", "estadisticas", "historial"].includes(activa)); }
+    if (mas) { mas.open = false; mas.classList.toggle("on", ["equipos", "estadisticas", "historial", "agregados"].includes(activa)); }
     if (!mantener) window.scrollTo(0, 0);
   }
 

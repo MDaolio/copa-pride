@@ -700,3 +700,31 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 @media (min-width:901px){.gfx-toast{inset:auto 1.4rem 1.4rem auto}}
 @media (max-width:560px){.gfx-esc .badge.grande{width:72px;height:72px}.gfx-t strong{font-size:2.8rem}.gfx-eq{font-size:1.3rem}.mc-carrera{height:46%}.mc-sentado{height:56%;right:0}.mc-brillos i{font-size:12px}}
 @media (prefers-reduced-motion:reduce){.gfx-esc,.gfx-t strong,.gfx-masc *{animation:none!important}.mc-carrera,.mc-polvo,.mc-brisa,.mc-poof,.mc-brillos{display:none}.mc-sentado{opacity:1}.gfx-conf{display:none}}
+
+/* ---------------- Cupos de agregados ---------------- */
+.ag-regla{color:var(--tinta-2);max-width:62ch;margin:.2rem 0 1rem}
+.ag-regla b{color:var(--tinta)}
+.ag-res{display:flex;flex-wrap:wrap;gap:.6rem 1.8rem;margin:0 0 1.6rem;font-variant-numeric:tabular-nums}
+.ag-res div{display:flex;align-items:baseline;gap:.5rem}
+.ag-res strong{font-family:var(--display);font-weight:400;font-size:2.2rem;line-height:1;color:var(--oro-t)}
+.ag-res span{color:var(--tinta-2);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.ag-zonas{display:grid;grid-template-columns:1fr;gap:1.2rem}
+@media (min-width:700px){.ag-zonas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ag-z{font-family:var(--display);font-weight:400;font-size:1.25rem;letter-spacing:.12em;color:var(--oro-t);margin:0 0 .5rem}
+.ag-zonas ul{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.ag-eq{background:var(--hoja);border:1px solid var(--linea);border-left:4px solid var(--c1);padding:.6rem .75rem;display:grid;gap:.4rem}
+.ag-eq.full{border-color:var(--vivo);border-left-color:var(--vivo)}
+.ag-fila{display:flex;align-items:center;gap:.6rem;color:inherit;text-decoration:none}
+.ag-fila .badge{flex:0 0 auto}
+.ag-nom{font-weight:700;flex:1;min-width:0}
+.ag-cup{display:flex;align-items:center;gap:.35rem;flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:.82rem;color:var(--tinta-2)}
+.ag-cup b{font-weight:600;margin-left:.15rem}
+.ag-pip{width:14px;height:14px;border-radius:50%;border:2px solid var(--oro-osc)}
+.ag-pip.on{background:var(--oro-t);border-color:var(--oro-t)}
+.ag-eq.full .ag-pip.on{background:var(--vivo);border-color:var(--vivo)}
+.ag-quien{display:flex;flex-wrap:wrap;gap:.2rem .8rem;font-size:.85rem}
+.ag-quien a{color:var(--tinta-2);text-decoration:none}
+.ag-quien a::before{content:"+ ";color:var(--oro-t)}
+.ag-quien a:hover{color:var(--tinta)}
+.ag-estado{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--vivo)}
+@media (max-width:560px){.ag-res{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}.ag-res div{flex-direction:column;gap:.15rem}.ag-res span{font-size:.68rem}}

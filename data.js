@@ -19,6 +19,9 @@ window.LIGA_DATA = {
   lema: "Juntxs por el deporte",
   // Texto de horario que aparece arriba en Inicio y Fixture.
   horario: "Sábados de 14 a 17 hs",
+  // Cuántos jugadores puede sumar cada equipo una vez empezada la Copa.
+  // Un jugador agregado lleva agregado: "AAAA-MM-DD" (la fecha en que se sumó).
+  cupoAgregados: 2,
 
   // Dirección web de los resultados en vivo (Google Apps Script).
   // Se completa una sola vez, siguiendo INSTALAR-EN-VIVO.txt. Vacío = sin en vivo.
