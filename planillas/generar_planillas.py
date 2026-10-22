@@ -30,8 +30,8 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
     """Dibuja la tabla de un equipo. ytop = borde superior del título."""
     nombre = nombre_equipo(eid)
     # título del equipo
-    c.setFillColor(NEGRO); c.rect(x0, ytop - 9 * mm, ancho, 9 * mm, fill=1, stroke=0)
-    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 14)
+    c.setFillColor(GRISCLARO); c.setStrokeColor(black); c.setLineWidth(0.9); c.rect(x0, ytop - 9 * mm, ancho, 9 * mm, fill=1, stroke=1)
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 14)
     esc = os.path.join(RAIZ, EQ[eid]["escudo"]) if eid in EQ and EQ[eid].get("escudo") else ""
     tx = x0 + 3 * mm
     if esc and os.path.exists(esc):
@@ -83,21 +83,21 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
 
 def hoja(c, p):
     local, visit = p["local"], p["visitante"]
-    # banda superior
-    c.setFillColor(NEGRO); c.rect(0, H - 24 * mm, W, 24 * mm, fill=1, stroke=0)
-    c.drawImage(os.path.join(RAIZ, "img", "logo-copa.png"), M, H - 23 * mm, 26 * mm, 22.8 * mm, preserveAspectRatio=True, mask="auto")
-    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 20); c.drawString(M + 32 * mm, H - 12 * mm, "PLANILLA DE JUEGO")
-    c.setFillColor(white); c.setFont("Helvetica", 10)
+    # cabecera (sin rellenos: se imprime en blanco y negro)
+    c.drawImage(os.path.join(AQUI, "logo-copa-bn.png"), M, H - 23 * mm, 26 * mm, 22.8 * mm, preserveAspectRatio=True, mask="auto")
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 20); c.drawString(M + 32 * mm, H - 12 * mm, "PLANILLA DE JUEGO")
+    c.setFont("Helvetica", 10)
     c.drawString(M + 32 * mm, H - 18.5 * mm, "Copa Pride 2026 · By Liga Pride · Juntxs por el deporte")
+    c.setStrokeColor(black); c.setLineWidth(1.6); c.line(M, H - 24 * mm, W - M, H - 24 * mm)
     # datos del partido (derecha)
     fecha = FECHAS.get(p["fecha"], p["fase"]); dia = DIAS.get(p["fecha"], p["fecha"])
-    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 13)
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 13)
     c.drawRightString(W - M, H - 9 * mm, (nombre_equipo(local) + "  vs  " + nombre_equipo(visit)).upper())
-    c.setFillColor(white); c.setFont("Helvetica-Bold", 10)
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 10)
     zona = ("Zona " + p["zona"] + " · ") if p.get("zona") else ""
     c.drawRightString(W - M, H - 14.5 * mm, f"{zona}{fecha} · {dia} · {p['hora']} hs · {p['cancha']}")
     c.setFont("Helvetica-Bold", 10); c.drawRightString(W - M - 62 * mm, H - 20.5 * mm, "Veedor/a:")
-    c.setStrokeColor(white); c.setLineWidth(0.7); c.line(W - M - 60 * mm, H - 21 * mm, W - M, H - 21 * mm)
+    c.setStrokeColor(black); c.setLineWidth(0.7); c.line(W - M - 60 * mm, H - 21 * mm, W - M, H - 21 * mm)
     # tablas
     gap = 6 * mm; ancho = (W - 2 * M - gap) / 2
     ytop = H - 24 * mm - 3 * mm
@@ -105,16 +105,17 @@ def hoja(c, p):
     ybase = min(y1, y2) - 7 * mm
     # recuadro de resultado final
     bh = 17 * mm
-    c.setFillColor(NEGRO); c.rect(M, ybase - bh, W - 2 * M, bh, fill=1, stroke=0)
-    c.setFillColor(ORO); c.setFont("Helvetica-Bold", 9); c.drawString(M + 3 * mm, ybase - 5 * mm, "RESULTADO FINAL (escribilo grande, es lo que se carga)")
-    c.setFillColor(white); c.setFont("Helvetica-Bold", 13)
+    c.setFillColor(GRISCLARO); c.setStrokeColor(black); c.setLineWidth(1.2); c.rect(M, ybase - bh, W - 2 * M, bh, fill=1, stroke=1)
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 9); c.drawString(M + 3 * mm, ybase - 5 * mm, "RESULTADO FINAL (escribilo grande, es lo que se carga)")
+    c.setFont("Helvetica-Bold", 13)
     nl, nv = nombre_equipo(local).upper(), nombre_equipo(visit).upper()
     cx = W / 2
     c.drawRightString(cx - 24 * mm, ybase - 12.5 * mm, nl)
     c.drawString(cx + 24 * mm, ybase - 12.5 * mm, nv)
-    c.setFillColor(white); c.rect(cx - 20 * mm, ybase - bh + 2 * mm, 16 * mm, 11 * mm, fill=1, stroke=0)
-    c.rect(cx + 4 * mm, ybase - bh + 2 * mm, 16 * mm, 11 * mm, fill=1, stroke=0)
-    c.setFillColor(white); c.setFont("Helvetica-Bold", 20); c.drawCentredString(cx, ybase - 12 * mm, "–")
+    c.setFillColor(white); c.setLineWidth(1.4)
+    c.rect(cx - 20 * mm, ybase - bh + 2 * mm, 16 * mm, 11 * mm, fill=1, stroke=1)
+    c.rect(cx + 4 * mm, ybase - bh + 2 * mm, 16 * mm, 11 * mm, fill=1, stroke=1)
+    c.setFillColor(black); c.setFont("Helvetica-Bold", 20); c.drawCentredString(cx, ybase - 12 * mm, "–")
     # pie: firmas
     yf = ybase - bh - 4 * mm
     c.setFillColor(black); c.setFont("Helvetica-Bold", 8)
@@ -127,9 +128,9 @@ def hoja(c, p):
     c.setFont("Helvetica-Bold", 7.5); c.drawString(M + 1 * mm, yf - 17 * mm, "Incidencias:")
     c.line(M + 18 * mm, yf - 17.5 * mm, W - M, yf - 17.5 * mm)
     # instrucción
-    c.setFillColor(ORO); c.rect(0, 0, W, 7 * mm, fill=1, stroke=0)
+    c.setStrokeColor(black); c.setLineWidth(1.2); c.line(M, 8 * mm, W - M, 8 * mm)
     c.setFillColor(black); c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(W / 2, 2.4 * mm, "GOLES: palitos en el recuadro (la banda cierra el 5). TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro negro.")
+    c.drawCentredString(W / 2, 3.8 * mm, "GOLES: palitos en el recuadro (la banda cierra el 5). TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro grande.")
 
 def pdf(nombre, partidos):
     c = canvas.Canvas(os.path.join(AQUI, nombre), pagesize=landscape(A4))
