@@ -41,7 +41,7 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
             pass
     c.drawString(tx, ytop - 6.3 * mm, nombre.upper())
     # columnas
-    cols = [("Nº", 9), ("Nombre y apellido", 49), ("JUGÓ", 11), ("GOLES", 29), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
+    cols = [("Nº", 9), ("Nombre y apellido", 49), ("JUGÓ", 11), ("GOLES (nº)", 29), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
     tot = sum(w for _, w in cols); esc_f = ancho / mm / tot
     xs = [x0]
     for _, w in cols: xs.append(xs[-1] + w * esc_f * mm)
@@ -65,8 +65,8 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
         s = 4.2 * mm
         cy = yb + (alto - s) / 2
         box(c, (xs[2] + xs[3]) / 2 - s / 2, cy)
-        gx = xs[3]; gw = (xs[4] - xs[3]) / 4
-        for k in range(4): box(c, gx + k * gw + (gw - s) / 2, cy)
+        bw = (xs[4] - xs[3]) - 4 * mm
+        c.setLineWidth(0.7); c.setStrokeColor(black); c.rect(xs[3] + 2 * mm, yb + 0.9 * mm, bw, alto - 1.8 * mm, fill=0)
         for i in (4, 5, 6): box(c, (xs[i] + xs[i + 1]) / 2 - s / 2, cy)
         y = yb
     # líneas verticales
@@ -127,7 +127,7 @@ def hoja(c, p):
     # instrucción
     c.setFillColor(ORO); c.rect(0, 0, W, 7 * mm, fill=1, stroke=0)
     c.setFillColor(black); c.setFont("Helvetica-Bold", 8)
-    c.drawCentredString(W / 2, 2.4 * mm, "PINTÁ EL CASILLERO (uno por gol, por tarjeta). NO hagas rayitas ni garabatos. El resultado final va siempre en el recuadro negro.")
+    c.drawCentredString(W / 2, 2.4 * mm, "GOLES: escribí el NÚMERO (ej. 2), no rayitas. TARJETAS: pintá el casillero. El resultado final va siempre en el recuadro negro.")
 
 def pdf(nombre, partidos):
     c = canvas.Canvas(os.path.join(AQUI, nombre), pagesize=landscape(A4))
@@ -138,5 +138,5 @@ def pdf(nombre, partidos):
 
 if __name__ == "__main__":
     P = {p["id"]: p for p in datos["pa"]}
-    for fecha, nom in (("2026-10-24", "Planillas_Fecha2_24-10.pdf"), ("2026-10-31", "Planillas_Fecha3_31-10.pdf")):
+    for fecha, nom in (("2026-10-24", "Planillas_Fecha2_24-10.pdf"),):   # una fecha por vez: se agregan jugadores nuevos antes de generar la siguiente
         pdf(nom, [p for p in datos["pa"] if p["fecha"] == fecha])
