@@ -607,8 +607,15 @@ a.cifra:hover{border-color:var(--oro)}
 .figu-pie{display:flex;justify-content:space-between;margin-top:.9rem;padding-top:.6rem;border-top:1px solid var(--oro-osc);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2)}
 .cab-marca::after{display:none}
 
-/* Soy veedor: bien visible */
-.rail .soy-veedor{display:inline-flex;align-items:center;gap:.5rem;border:1.5px solid var(--oro);border-radius:999px;padding:.6rem 1.1rem;background:rgba(200,147,42,.14);color:var(--oro-t);font-family:var(--display);font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase;line-height:1;transition:background .15s,color .15s}
-.rail .soy-veedor::before{content:"📋"}
-.rail .soy-veedor:hover{background:var(--oro);color:#111}
-@media (max-width:900px){.mas-panel .soy-veedor{background:var(--oro);color:#111;font-family:var(--display);font-size:1.2rem;letter-spacing:.06em;border:0;padding:.8rem 1rem}}
+/* Soy veedor: texto dorado, un poco más grande */
+.rail .soy-veedor{font-family:var(--texto);font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--oro-t);border-bottom:1px solid var(--oro);padding-bottom:2px}
+.rail .soy-veedor:hover{color:#fff}
+@media (max-width:900px){.mas-panel .soy-veedor{color:var(--oro-t);font-family:var(--texto);font-size:.85rem;font-weight:700;border:0;padding:.8rem 1rem}}
+
+/* Barras de desplazamiento discretas */
+.rail{scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0b0a09}
+::-webkit-scrollbar-thumb{background:#3a352e;border-radius:8px}
