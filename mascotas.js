@@ -122,61 +122,63 @@
   /* ---------------- Dogo argentino ---------------- */
   const BLANCO = "#fbfbf8", SOMBRA = "#dfe4ea", ROSA = "#f4a6b4", DOGO_NEGRO = "#1d1d22", COLLAR = "#2f8fe0", CHAPITA = "#f2c14e";
 
+  const tachas = (pts) => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.9" fill="${CHAPITA}"/>`).join("");
+
   const DOGO_CORRE = `<svg viewBox="0 0 200 140" aria-hidden="true">
-    <g class="mc-cola-corre"><path d="M48 58 C36 52 22 46 8 46 C20 52 32 60 46 66 Z" fill="${SOMBRA}"/></g>
-    ${pata("p-tras-lejos", 58, 76, 42, 10, SOMBRA, SOMBRA)}
-    ${pata("p-del-lejos", 126, 76, 42, 10, SOMBRA, SOMBRA)}
-    <ellipse cx="90" cy="64" rx="47" ry="25" fill="${BLANCO}"/>
-    <path d="M52 74 C70 90 112 90 132 76 C112 84 74 84 52 74 Z" fill="${SOMBRA}"/>
-    <ellipse cx="60" cy="68" rx="20" ry="18" fill="${BLANCO}"/>
-    <path d="M48 62 C52 74 62 80 72 80" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M112 44 C118 36 128 30 140 30 C144 44 138 58 126 66 Z" fill="${BLANCO}"/>
-    <path d="M124 34 C130 44 136 52 140 58" stroke="${COLLAR}" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="138" cy="62" r="4.2" fill="${CHAPITA}"/>
-    ${pata("p-tras-cerca", 64, 78, 44, 11, BLANCO, BLANCO)}
-    ${pata("p-del-cerca", 120, 78, 44, 11, BLANCO, BLANCO)}
+    <g class="mc-cola-corre"><path d="M46 56 C34 52 22 50 10 52 C22 56 34 62 44 66 Z" fill="${SOMBRA}"/></g>
+    ${pata("p-tras-lejos", 58, 78, 40, 13, SOMBRA, SOMBRA)}
+    ${pata("p-del-lejos", 124, 80, 40, 13, SOMBRA, SOMBRA)}
+    <path d="M44 62 C44 44 70 38 96 40 C120 40 140 44 144 62 C146 82 128 94 100 92 C78 92 62 86 50 80 C46 76 44 70 44 62 Z" fill="${BLANCO}"/>
+    <path d="M58 82 C74 90 104 94 128 88" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="60" cy="66" rx="22" ry="20" fill="${BLANCO}"/>
+    <path d="M44 60 C48 74 60 82 74 82 M110 50 C116 62 124 72 136 76" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M114 46 C120 32 134 24 146 26 C152 40 148 60 132 70 Z" fill="${BLANCO}"/>
+    <path d="M128 30 C134 42 140 52 144 62" stroke="${COLLAR}" stroke-width="9" stroke-linecap="round"/>
+    ${tachas([[130, 35], [134, 43], [138, 51], [141, 58]])}
+    ${pata("p-tras-cerca", 64, 80, 42, 15, BLANCO, BLANCO)}
+    ${pata("p-del-cerca", 118, 82, 42, 15, BLANCO, BLANCO)}
     <g class="mc-cabeza-corre">
-      <path d="M134 22 C128 22 124 30 128 38 C132 34 136 30 140 28 Z" fill="${ROSA}" opacity=".9"/>
-      <ellipse cx="150" cy="36" rx="22" ry="19" fill="${BLANCO}"/>
-      <path d="M156 30 C172 28 186 32 190 40 C190 50 182 56 166 56 C158 56 152 50 152 44 Z" fill="${BLANCO}"/>
-      <path d="M166 56 C174 56 184 54 189 48" stroke="${SOMBRA}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-      <ellipse cx="189" cy="37" rx="5" ry="4.2" fill="${DOGO_NEGRO}"/><ellipse cx="187.6" cy="35.6" rx="1.4" ry=".9" fill="#fff" opacity=".7"/>
-      <path class="mc-lengua" d="M168 54 C168 66 178 68 180 58 C178 55 174 54 168 54 Z" fill="#ff7b93"/>
-      <ellipse cx="152" cy="29" rx="8" ry="7" fill="${DOGO_NEGRO}" opacity=".9"/>
-      <path d="M148 30 Q153 26 158 30" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-      <path d="M134 18 C126 14 120 22 124 32 C128 30 132 26 138 24 Z" fill="${SOMBRA}"/>
-      <ellipse cx="160" cy="46" rx="4" ry="2.2" fill="#ff8f8f" opacity=".55"/>
+      <path d="M140 18 L144 0 L154 14 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><path d="M143 14 L145 5 L150 13 Z" fill="${ROSA}"/>
+      <path d="M134 22 C134 12 146 8 160 10 C168 12 172 18 174 24 C184 24 192 28 194 36 C196 48 190 56 176 58 C164 60 150 58 142 50 C136 44 134 32 134 22 Z" fill="${BLANCO}"/>
+      <path d="M150 50 C160 56 176 56 190 50" stroke="${SOMBRA}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M176 44 C182 48 188 47 193 44" stroke="${DOGO_NEGRO}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M181 46 L183 51 L185 46 Z" fill="#fff" stroke="${SOMBRA}" stroke-width=".6"/>
+      <ellipse cx="193" cy="31" rx="5.4" ry="4.6" fill="${DOGO_NEGRO}"/><ellipse cx="191.6" cy="29.6" rx="1.5" ry=".9" fill="#fff" opacity=".7"/>
+      <ellipse cx="160" cy="27" rx="5" ry="4" fill="${ROSA}" opacity=".45"/>
+      <path d="M155 27 C158 25 162 25 165 27 C162 30 158 30 155 27 Z" fill="${DOGO_NEGRO}"/><circle cx="161.5" cy="26.8" r="1" fill="#fff"/>
+      <path d="M153 21 L168 25" stroke="#8d97a5" stroke-width="3" stroke-linecap="round"/>
     </g>
   </svg>`;
 
   const DOGO_SIENTA = `<svg viewBox="0 0 120 160" aria-hidden="true">
-    <g class="mc-cola"><path d="M84 140 C100 138 108 126 106 110 C105 104 100 105 100 110 C100 122 94 130 82 132 Z" fill="${SOMBRA}"/></g>
+    <g class="mc-cola"><path d="M88 142 C102 140 110 128 108 114 C107 108 102 109 102 114 C102 124 96 132 86 134 Z" fill="${SOMBRA}"/></g>
     <g class="mc-cuerpo">
-      <ellipse cx="60" cy="116" rx="31" ry="32" fill="${BLANCO}"/>
-      <ellipse cx="34" cy="138" rx="15" ry="13" fill="${SOMBRA}"/><ellipse cx="86" cy="138" rx="15" ry="13" fill="${SOMBRA}"/>
-      <ellipse cx="29" cy="151" rx="11" ry="5.5" fill="${BLANCO}"/><ellipse cx="91" cy="151" rx="11" ry="5.5" fill="${BLANCO}"/>
-      <path d="M44 100 C50 112 70 112 76 100" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <rect x="44" y="104" width="13" height="48" rx="6.5" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><rect x="63" y="104" width="13" height="48" rx="6.5" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/>
-      <path d="M47 151 v-4 M50.5 152 v-5 M54 151 v-4 M66 151 v-4 M69.5 152 v-5 M73 151 v-4" stroke="${SOMBRA}" stroke-width="1.4" stroke-linecap="round"/>
-      <path d="M36 86 C46 94 74 94 84 86" stroke="${COLLAR}" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <circle cx="60" cy="97" r="5.4" fill="${CHAPITA}"/><circle cx="60" cy="97" r="2.4" fill="#d79a1c"/>
+      <ellipse cx="28" cy="136" rx="17" ry="15" fill="${SOMBRA}"/><ellipse cx="92" cy="136" rx="17" ry="15" fill="${SOMBRA}"/>
+      <ellipse cx="24" cy="151" rx="12" ry="6" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.2"/><ellipse cx="96" cy="151" rx="12" ry="6" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.2"/>
+      <path d="M22 96 C22 86 40 80 60 80 C80 80 98 86 98 96 C100 116 92 138 82 146 L38 146 C28 138 20 116 22 96 Z" fill="${BLANCO}"/>
+      <path d="M36 100 C42 112 54 114 60 106 C66 114 78 112 84 100" stroke="${SOMBRA}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M26 100 C30 108 32 118 34 126 M94 100 C90 108 88 118 86 126" stroke="${SOMBRA}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <rect x="37" y="106" width="17" height="47" rx="8" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.6"/><rect x="66" y="106" width="17" height="47" rx="8" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.6"/>
+      <path d="M41 151 v-5 M45.5 152 v-6 M50 151 v-5 M70 151 v-5 M74.5 152 v-6 M79 151 v-5" stroke="${SOMBRA}" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M28 86 C40 96 80 96 92 86" stroke="${COLLAR}" stroke-width="9" fill="none" stroke-linecap="round"/>
+      ${tachas([[34, 89], [43, 92.6], [52, 94.2], [68, 94.2], [77, 92.6], [86, 89]])}
+      <circle cx="60" cy="100" r="5.4" fill="${CHAPITA}"/><circle cx="60" cy="100" r="2.4" fill="#d79a1c"/>
     </g>
     <g class="mc-cabeza">
-      <g class="mc-oreja-i"><path d="M38 40 C28 36 20 44 22 56 C24 62 30 62 34 56 C36 50 38 46 42 44 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><path d="M34 44 C28 44 26 50 27 55 C30 56 32 52 34 48 Z" fill="${ROSA}"/></g>
-      <g class="mc-oreja-d"><path d="M82 40 C92 36 100 44 98 56 C96 62 90 62 86 56 C84 50 82 46 78 44 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.5"/><path d="M86 44 C92 44 94 50 93 55 C90 56 88 52 86 48 Z" fill="${ROSA}"/></g>
-      <ellipse cx="60" cy="56" rx="27" ry="24" fill="${BLANCO}"/>
-      <path d="M50 38 C54 42 56 46 58 50 M70 38 C66 42 64 46 62 50" stroke="${SOMBRA}" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <ellipse cx="44" cy="74" rx="10" ry="8" fill="${BLANCO}"/><ellipse cx="76" cy="74" rx="10" ry="8" fill="${BLANCO}"/>
-      <path d="M36 76 C40 84 50 86 56 82 M84 76 C80 84 70 86 64 82" stroke="${SOMBRA}" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path class="mc-lengua" d="M54 80 C54 92 66 92 66 80 Z" fill="#ff7b93"/><path d="M60 82 v6" stroke="#e35d78" stroke-width="1.2"/>
-      <path d="M48 76 Q54 82 60 76 Q66 82 72 76" stroke="${DOGO_NEGRO}" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M60 70 v6" stroke="${DOGO_NEGRO}" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="60" cy="67" rx="7.5" ry="5.4" fill="${DOGO_NEGRO}"/><ellipse cx="62" cy="68.4" rx="2.4" ry="1.4" fill="${ROSA}"/><ellipse cx="57.6" cy="65.4" rx="2" ry="1.1" fill="#fff" opacity=".7"/>
-      <ellipse cx="71" cy="53" rx="9" ry="8" fill="${DOGO_NEGRO}" opacity=".9"/>
-      <g class="mc-ojos"><ellipse cx="49" cy="54" rx="4.4" ry="5.4" fill="${DOGO_NEGRO}"/><ellipse cx="71" cy="54" rx="4.4" ry="5.4" fill="#000"/>
-        <circle cx="50.6" cy="52.2" r="1.8" fill="#fff"/><circle cx="72.6" cy="52.2" r="1.8" fill="#fff"/>
-        <circle cx="47.8" cy="56" r=".9" fill="#fff"/><circle cx="69.8" cy="56" r=".9" fill="#fff"/></g>
-      <ellipse cx="40" cy="64" rx="4.2" ry="2.4" fill="#ff8f8f" opacity=".55"/><ellipse cx="80" cy="64" rx="4.2" ry="2.4" fill="#ff8f8f" opacity=".55"/>
+      <g class="mc-oreja-i"><path d="M34 34 L30 8 L50 26 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.6" stroke-linejoin="round"/><path d="M36 28 L34 15 L45 25 Z" fill="${ROSA}"/></g>
+      <g class="mc-oreja-d"><path d="M86 34 L90 8 L70 26 Z" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.6" stroke-linejoin="round"/><path d="M84 28 L86 15 L75 25 Z" fill="${ROSA}"/></g>
+      <path d="M30 40 C30 26 44 20 60 20 C76 20 90 26 90 40 C92 54 92 66 86 76 C80 86 70 90 60 90 C50 90 40 86 34 76 C28 66 28 54 30 40 Z" fill="${BLANCO}"/>
+      <path d="M60 24 v14" stroke="${SOMBRA}" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M34 66 C38 80 48 86 56 86 M86 66 C82 80 72 86 64 86" stroke="${SOMBRA}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="46" cy="51" rx="7" ry="5" fill="${ROSA}" opacity=".4"/><ellipse cx="74" cy="51" rx="7" ry="5" fill="${ROSA}" opacity=".4"/>
+      <g class="mc-ojos"><path d="M40 51 C42 47 50 47 52 51 C50 55 42 55 40 51 Z" fill="${DOGO_NEGRO}"/><path d="M68 51 C70 47 78 47 80 51 C78 55 70 55 68 51 Z" fill="${DOGO_NEGRO}"/>
+        <circle cx="48" cy="50" r="1.4" fill="#fff"/><circle cx="76" cy="50" r="1.4" fill="#fff"/></g>
+      <path d="M38 43 L53 47 M82 43 L67 47" stroke="#8d97a5" stroke-width="3.6" stroke-linecap="round"/>
+      <ellipse cx="60" cy="70" rx="17" ry="11" fill="${BLANCO}" stroke="${SOMBRA}" stroke-width="1.4"/>
+      <path d="M50 62 C52 58 68 58 70 62 C70 67 64 69 60 69 C56 69 50 67 50 62 Z" fill="${DOGO_NEGRO}"/><ellipse cx="56" cy="61.4" rx="3" ry="1.4" fill="#fff" opacity=".6"/><ellipse cx="64" cy="66" rx="2.4" ry="1.3" fill="${ROSA}"/>
+      <path d="M60 69 v5" stroke="${DOGO_NEGRO}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M46 74 C52 79 56 78 60 74 C64 78 70 80 76 72" stroke="${DOGO_NEGRO}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M50 76.6 L52 81.4 L54 77.6 Z M68 77.6 L70 81.4 L72 76" fill="#fff" stroke="${SOMBRA}" stroke-width=".7"/>
     </g>
   </svg>`;
 
