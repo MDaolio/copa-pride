@@ -825,7 +825,7 @@
       case "jugador": html = vistaJugador(arg); break;
       case "estadisticas": html = vistaEstadisticas(); break;
       case "historial": html = vistaHistorial(); break;
-      case "demo-gol": html = vistaInicio(); setTimeout(demoGol, 900); break;
+      case "demo-gol": html = vistaInicio(); esperarIntro(demoGol); break;
       default: html = vistaInicio();
     }
     document.getElementById("app").innerHTML = html;
@@ -915,6 +915,11 @@
     }
   }
   function festejar(lista) { lista.forEach((ev, i) => setTimeout(() => festejarUno(ev), i * 5200)); }
+  // Espera a que se cierre la pantalla de entrada (la de la pelota) antes de lanzar la simulación.
+  function esperarIntro(fn) {
+    const t = () => (document.getElementById("intro") ? setTimeout(t, 300) : setTimeout(fn, 700));
+    t();
+  }
   function demoGol() {
     // Simulación: un gol en el primer resultado y, después, uno en el de al lado.
     const cards = [...document.querySelectorAll(".mt.fin[data-id]")].slice(0, 2);
