@@ -570,9 +570,11 @@
 
   function vistaEquipos() {
     if (!equipos().length) return vacio("Todavía no hay equipos cargados.");
-    return `<h2 class="titulo-pag">Equipos participantes</h2>` + zonas().map((z) =>
-      `<h3 class="zona-t"><span>ZONA</span><em>${esc(z)}</em></h3><div class="grid">` + equipos().filter((e) => e.zona === z).map((e) =>
-        `<a class="tarjeta" href="#/equipo/${esc(e.id)}">${badge(e, "grande")}<h3>${esc(e.nombre)}</h3><p>${e.cabeza ? "Cabeza de serie " + esc(e.cabeza) + " · " : ""}${esc(e.pais || "")}${e.pais ? " · " : ""}${jugadores().filter((j) => j.equipo === e.id).length} jugadores</p></a>`).join("") + `</div>`).join("");
+    return `<p class="kicker">${equipos().length} equipos · ${zonas().length} zonas</p><h2 class="titulo-pag">Equipos participantes</h2>` + zonas().map((z) =>
+      `<section class="eqz"><div class="eqz-z"><span>ZONA</span><em>${esc(z)}</em></div><div class="eqz-l">` + equipos().filter((e) => e.zona === z).map((e) => {
+        const nj = jugadores().filter((j) => j.equipo === e.id).length;
+        return `<a class="eqf" href="#/equipo/${esc(e.id)}">${badge(e, "med")}<div class="eqf-t"><h3>${esc(e.nombre)}</h3><p>${e.cabeza ? "Cabeza de serie " + esc(e.cabeza) + " · " : ""}${esc(e.pais || "")}${e.pais ? " · " : ""}${nj} jugadores</p></div><span class="eqf-f">→</span></a>`;
+      }).join("") + `</div></section>`).join("");
   }
 
   function fotoGrande(j) {
@@ -619,8 +621,13 @@
     if (estadoEst.tab === "goleadores") {
       const lista = rankear(goleadores(), (x) => x.goles + "|" + x.pj).filter((x) => x.rank <= 15).slice(0, 15);
       const max = lista.length ? lista[0].goles : 1;
-      cuerpo = lista.length ? `<ol class="rank tally">${lista.map((x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null;
-        return `<li class="${x.rank <= 3 ? "top top" + x.rank : ""}"><span class="rk">${x.rank}</span>${badge(e, "chico")}<div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small></div>${palitos(x.goles)}<b>${x.goles}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay goles cargados.");
+      const fila = (x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null; return { x, j, e }; };
+      const pod = lista.slice(0, 3).map(fila);
+      const orden = [pod[1], pod[0], pod[2]].filter(Boolean);
+      const podio = pod.length ? `<div class="podio">${orden.map(({ x, j, e }) => `<a class="pd p${pod.indexOf(orden.find((o) => o.x === x)) + 1}" href="#/jugador/${esc(x.id)}">
+          <span class="pd-rk">${x.rank}</span>${badge(e, "grande")}<b class="pd-n">${esc(j ? j.nombre : "?")}</b><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small><em>${x.goles}<u>goles</u></em></a>`).join("")}</div>` : "";
+      const resto = lista.slice(3).map((x) => { const { j, e } = fila(x); return `<li><span class="rk">${x.rank}</span><div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small></div>${barra(x.goles / max * 100)}<b>${x.goles}</b></li>`; }).join("");
+      cuerpo = lista.length ? podio + (resto ? `<ol class="rank barras">${resto}</ol>` : "") : vacio("Todavía no hay goles cargados.");
       nota = (D.estadisticasSoloZona ? "Cuenta solo la fase de zonas" : "Cuenta todo el torneo (zonas, cuartos, semis, final y 3er puesto)") + ". Los goles de las definiciones por penales no suman. Si empatan en goles, va primero el que jugó menos partidos; si siguen iguales, comparten el puesto.";
     } else if (estadoEst.tab === "valla") {
       const vr = rankear(valla(), (x) => x.prom.toFixed(6) + "|" + x.dist + "|" + x.gr).filter((x) => x.rank <= 10);
@@ -642,9 +649,9 @@
       nota = "La organización confirma cada sanción.";
     } else {
       const vs = veedoresStats(), max = vs.length ? Math.max(1, vs[0].partidos) : 1;
-      cuerpo = vs.length ? `<ol class="rank tally">${vs.map((x, i) => {
+      cuerpo = vs.length ? `<ol class="rank barras">${vs.map((x, i) => {
         const inf = veedorInfo(x.nombre), e = (inf && inf.equipo ? equipo(inf.equipo) : null) || equipo(x.eq);
-        return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${palitos(x.partidos)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
+        return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${barra(x.partidos / max * 100)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
       nota = "Cuenta los partidos que veedó cada uno (jugados o en vivo, sin los W.O.). Los que todavía no veedaron ninguno figuran con 0.";
     }
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
@@ -760,17 +767,6 @@
       if (ev.target.matches("[data-eq]")) { estadoFx.eq = ev.target.value; render(true); }
       if (ev.target.matches("[data-mi]")) { try { localStorage.setItem("copaMiEq", ev.target.value); } catch (e) { /* sin storage */ } render(true); }
     });
-    const ponerTema = () => {
-      const noche = document.documentElement.dataset.tema === "noche";
-      document.querySelectorAll("#tema span").forEach((x) => { x.textContent = noche ? "Modo claro" : "Modo noche"; });
-    };
-    ponerTema();
-    document.querySelectorAll("#tema,#tema2").forEach((b) => b.addEventListener("click", () => {
-      const nuevo = document.documentElement.dataset.tema === "noche" ? "dia" : "noche";
-      document.documentElement.dataset.tema = nuevo;
-      try { localStorage.setItem("copaTema", nuevo); } catch (e) { /* sin storage */ }
-      ponerTema();
-    }));
     window.addEventListener("hashchange", () => render(false));
     render(false);
     iniciarRemoto();
