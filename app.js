@@ -429,7 +429,7 @@
       titulo = "Terminó la Copa"; num = "FIN"; mes = ""; dia = D.estado || "Gracias por jugar";
     }
     return `<section class="cab">
-        <div class="cab-marca"><svg class="cab-cancha" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="150" cy="100" r="46"/><path d="M0 100h300M150 0v200"/><rect x="-2" y="50" width="52" height="100"/><rect x="250" y="50" width="52" height="100"/></svg><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"><p>${esc(D.lema || "")}</p></div>
+        <div class="cab-marca"><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"><p>${esc(D.lema || "")}</p></div>
         <div class="cab-fecha">
           <p class="k">${prox ? "Próxima fecha" : "Copa Pride"}</p>
           <div class="cab-num"><b>${esc(num)}</b><span>${esc(mes)}<br>${esc(dia)}</span></div>
