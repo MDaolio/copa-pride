@@ -171,6 +171,15 @@ img.badge{object-fit:contain;border-radius:0;background:transparent}
 .det{display:flex;flex-direction:column;gap:.15rem;padding:.4rem 0 .2rem;font-size:.86rem}
 .det small{color:var(--tinta-2);font-family:var(--mono);font-size:.68rem}
 
+.det2{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;padding:.5rem 0 .2rem}
+.det2 ul{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.det2 li{display:flex;align-items:baseline;gap:.4rem;font-size:.86rem;line-height:1.25}
+.det2 .nm{min-width:0;overflow-wrap:anywhere}
+.det2 .x{font-family:var(--display);color:var(--oro-t);font-size:1.1rem}
+.det-v{border-left:1px dashed var(--linea);padding-left:1rem}
+.det-v li{flex-direction:row-reverse;text-align:right}
+.det-pen{margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--linea);font-size:.8rem;color:var(--tinta-2)}
+.det2 small{color:var(--tinta-2);font-size:.7rem}
 /* ---------- Palitos de gol ---------- */
 .pal{display:inline-flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:.2rem .55rem;color:var(--tinta);max-width:11rem}
 .pal0{color:var(--tinta-2);font-family:var(--mono)}

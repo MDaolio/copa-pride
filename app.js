@@ -305,18 +305,28 @@
     return `<a class="fe ${cls}" ${href}>${badge(e, "chico")}<span class="n${e ? "" : " tbd"}">${nom}</span>${paisTag(e)}<span class="gl">${goles == null ? "" : esc(goles)}${penTxt}</span></a>`;
   }
 
+  /* Detalle del partido: lo de cada equipo del lado de ese equipo (local a la izquierda, visitante a la derecha). */
   function detalle(p) {
-    const g = (p.goles || []).map((x) => {
-      const j = jugador(x.j), e = equipo(x.e);
-      return `<li>⚽ ${esc(j ? j.nombre : "?")} <small>${esc(e ? e.nombre : "")}${x.min ? " · " + esc(x.min) + "'" : ""}</small></li>`;
-    }).join("");
-    const t = (p.tarjetas || []).map((x) => {
-      const j = jugador(x.j), e = equipo(x.e);
-      return `<li>${iconoTarj(x)} ${esc(j ? j.nombre : "?")} <small>${esc(e ? e.nombre : "")}</small></li>`;
-    }).join("");
+    const lado = (id) => {
+      const items = [];
+      (p.goles || []).filter((x) => x.e === id).forEach((x) => {
+        const j = jugador(x.j), nom = j ? j.nombre : "?";
+        const prev = items.find((i) => i.tipo === "g" && i.j === x.j && !x.min && !i.min);
+        if (prev) prev.n++; else items.push({ tipo: "g", j: x.j, nom, n: 1, min: x.min });
+      });
+      (p.tarjetas || []).filter((x) => x.e === id).forEach((x) => {
+        const j = jugador(x.j);
+        items.push({ tipo: "t", ico: iconoTarj(x), nom: j ? j.nombre : "?" });
+      });
+      return items.map((i) => i.tipo === "g"
+        ? `<li><span class="ic">⚽</span><span class="nm">${esc(i.nom)}${i.min ? ` <small>${esc(i.min)}'</small>` : ""}</span>${i.n > 1 ? `<b class="x">×${i.n}</b>` : ""}</li>`
+        : `<li><span class="ic">${i.ico}</span><span class="nm">${esc(i.nom)}</span></li>`).join("");
+    };
+    const l = lado(p.local), v = lado(p.visitante);
     const pn = p.penales && p.penales.local != null && p.penales.visitante != null
-      ? `<li>🥅 Definición por penales: ${esc((equipo(p.local) || {}).nombre || "")} ${esc(p.penales.local)} - ${esc(p.penales.visitante)} ${esc((equipo(p.visitante) || {}).nombre || "")} <small>(no suman goles)</small></li>` : "";
-    return g + t + pn ? `<ul class="det">${g}${t}${pn}</ul>` : `<p class="det vacio-txt">Sin detalle cargado.</p>`;
+      ? `<p class="det-pen">🥅 Definición por penales: ${esc((equipo(p.local) || {}).nombre || "")} ${esc(p.penales.local)} - ${esc(p.penales.visitante)} ${esc((equipo(p.visitante) || {}).nombre || "")} <small>(no suman goles)</small></p>` : "";
+    if (!l && !v && !pn) return `<p class="det vacio-txt">Sin detalle cargado.</p>`;
+    return `<div class="det2"><ul class="det-l">${l}</ul><ul class="det-v">${v}</ul></div>${pn}`;
   }
 
   /* Veedores: nombre (equipo). Se busca sin importar mayúsculas ni tildes. */
