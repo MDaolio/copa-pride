@@ -108,6 +108,16 @@
       equipo(a.id).nombre.localeCompare(equipo(b.id).nombre, "es"));
   }
 
+  // El mismo ranking 1-16, pero con las tablas como están hoy (aunque falten partidos): para "Así quedaría hoy".
+  function rankingParcial() {
+    const zs = zonas();
+    if (!zs.length) return [];
+    const lista = [];
+    zs.forEach((z) => tablaZona(z).forEach((f, i) => lista.push({ ...f, pos: i + 1, zona: z })));
+    return lista.sort((a, b) => a.pos - b.pos || b.pts - a.pts || b.dg - a.dg || cmpFP(a, b) ||
+      equipo(a.id).nombre.localeCompare(equipo(b.id).nombre, "es"));
+  }
+
   const zonas = () => [...new Set(equipos().map((e) => e.zona).filter(Boolean))].sort();
 
   function zonaCompleta(z) {
@@ -630,7 +640,31 @@
     const camp = `<div class="rcol"><h3>Campeón</h3><div class="rcruces"><div class="campeon ${e ? "" : "tbd"}"><span class="copa-ico">🏆</span>${e ? badge(e, "grande") : ""}<h3>${e ? esc(e.nombre) : "Por definirse"}</h3><span class="kicker">${esc(copa.copa)}</span></div></div></div>`;
     const plata = /plata/i.test(copa.copa || "") ? " tono-plata" : "";
     return `<div class="copas-v${plata}"><p class="kicker">Eliminatorias</p><h2 class="titulo-pag">Copas</h2>
-      <div class="filtros">${tabs}</div><div class="bracket">${cols}${camp}</div></div>`;
+      <div class="filtros">${tabs}</div><div class="bracket">${cols}${camp}</div>${asiQuedaria(copa)}</div>`;
+  }
+
+  /* "Así quedaría hoy": los cuartos armados con las posiciones actuales (mientras no terminen las zonas). */
+  function asiQuedaria(copa) {
+    if (rankingGeneral()) return "";
+    const r1 = copa.rondas && copa.rondas[0];
+    if (!r1) return "";
+    const rk = rankingParcial();
+    const pj = partidos().filter((p) => p.fase === "Zona" && jugado(p)).length, tot = partidos().filter((p) => p.fase === "Zona").length;
+    const lado = (slot) => {
+      const m = /^#(\d+)$/.exec(slot || "");
+      const f = m ? rk[Number(m[1]) - 1] : null, e = f ? equipo(f.id) : null;
+      if (!e) return `<div class="aq-eq"><span class="aq-n tbd">${esc(slot || "")}</span></div>`;
+      return `<a class="aq-eq" href="#/equipo/${esc(e.id)}"><b class="aq-p">${esc(m[1])}º</b>${badge(e, "chico")}<span class="aq-n">${esc(e.nombre)}</span>
+        <span class="aq-z">${f.pos}º Zona ${esc(f.zona)} · ${f.pts} ${f.pts === 1 ? "pt" : "pts"}</span></a>`;
+    };
+    const cruces = r1.cruces.map((c) => {
+      const p = c.partidoId ? partidos().find((x) => x.id === c.partidoId) : null;
+      const sl = p ? (p.slotL != null ? p.slotL : p.local) : c.local, sv = p ? (p.slotV != null ? p.slotV : p.visitante) : c.visitante;
+      return `<article class="aq-c" style="--c1:var(--oro-t)"><div class="aq-t">${esc(c.nombre || "")}</div>${lado(sl)}<div class="aq-vs">vs</div>${lado(sv)}</article>`;
+    }).join("");
+    return `<section class="aq"><p class="kicker">Si las zonas terminaran hoy</p><h3 class="titulo-sec">Así quedaría ${esc(copa.copa)}</h3>
+      <p class="aq-nota">Cruces de ${esc((r1.nombre || "").toLowerCase())} según las posiciones de hoy (${pj} de ${tot} partidos de zona jugados). Cambia con cada resultado.</p>
+      <div class="aq-grid">${cruces}</div></section>`;
   }
 
   function vistaEquipos() {
