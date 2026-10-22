@@ -178,6 +178,7 @@ window.LIGA_DATA = {
     { id: "p98", nombre: "Jesus Caceres", equipo: "e5", foto: "" },
     { id: "p99", nombre: "David Alexis Noval", equipo: "e5", foto: "" },
     { id: "p100", nombre: "Amadeo Benjamin Segundo", equipo: "e5", foto: "" },
+    { id: "p340", nombre: "Juan Farinella", equipo: "e5", foto: "" },
     { id: "p101", nombre: "Erik Rodriguez", equipo: "e10", foto: "" },
     { id: "p102", nombre: "Nicolás Quiroga", equipo: "e10", foto: "" },
     { id: "p103", nombre: "Alonso Machin", equipo: "e10", foto: "" },

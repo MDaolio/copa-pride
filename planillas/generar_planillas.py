@@ -41,7 +41,7 @@ def tabla(c, x0, ytop, ancho, eid, filas=16):
             pass
     c.drawString(tx, ytop - 6.3 * mm, nombre.upper())
     # columnas
-    cols = [("Nº", 9), ("Nombre y apellido", 49), ("JUGÓ", 11), ("GOLES (palitos)", 29), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
+    cols = [("Nº", 9), ("Nombre y apellido", 58), ("JUGÓ", 11), ("GOLES (palitos)", 21), ("AMAR.", 11), ("ROJA", 11), ("AZUL", 11)]
     tot = sum(w for _, w in cols); esc_f = ancho / mm / tot
     xs = [x0]
     for _, w in cols: xs.append(xs[-1] + w * esc_f * mm)
