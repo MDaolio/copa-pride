@@ -606,3 +606,9 @@ a.cifra:hover{border-color:var(--oro)}
 .figu-st b{display:block;font-family:var(--display);font-weight:400;font-size:1.9rem;color:var(--tinta);line-height:1}
 .figu-pie{display:flex;justify-content:space-between;margin-top:.9rem;padding-top:.6rem;border-top:1px solid var(--oro-osc);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2)}
 .cab-marca::after{display:none}
+
+/* Soy veedor: bien visible */
+.rail .soy-veedor{display:inline-flex;align-items:center;gap:.5rem;border:1.5px solid var(--oro);border-radius:999px;padding:.6rem 1.1rem;background:rgba(200,147,42,.14);color:var(--oro-t);font-family:var(--display);font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase;line-height:1;transition:background .15s,color .15s}
+.rail .soy-veedor::before{content:"📋"}
+.rail .soy-veedor:hover{background:var(--oro);color:#111}
+@media (max-width:900px){.mas-panel .soy-veedor{background:var(--oro);color:#111;font-family:var(--display);font-size:1.2rem;letter-spacing:.06em;border:0;padding:.8rem 1rem}}
