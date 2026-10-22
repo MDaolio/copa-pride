@@ -332,22 +332,22 @@
   /* Veedores: nombre (equipo). Se busca sin importar mayúsculas ni tildes. */
   const clave = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
   const veedorInfo = (nombre) => (D.veedores || []).find((v) => clave(v.nombre) === clave(nombre));
+  const eqVeedor = (p) => p.veedorEq || ((veedorInfo(p.veedor) || {}).equipo) || "";
   const veedorTxt = (nombre, eqId) => {
     const v = veedorInfo(nombre), e = equipo(eqId) || (v && v.equipo ? equipo(v.equipo) : null);
-    return esc(nombre) + (e ? ` <span class="v-eq">(${esc(e.nombre)})</span>` : "");
+    return e ? esc(e.nombre) : esc(nombre);
   };
-  /* Cuántos partidos veedó cada uno (jugados o en vivo, sin contar los W.O.). */
+  /* Cuántos partidos veedó cada equipo (jugados o en vivo, sin contar los W.O.). */
   function veedoresStats() {
     const m = {};
-    (D.veedores || []).forEach((v) => { m[clave(v.nombre)] = { nombre: v.nombre, partidos: 0, fechas: new Set() }; });
-    partidos().filter((p) => p.veedor && (jugado(p) || enVivo(p)) && !p.wo).forEach((p) => {
-      const k = clave(p.veedor);
-      if (!m[k]) m[k] = { nombre: p.veedor, partidos: 0, fechas: new Set() };
-      if (p.veedorEq) m[k].eq = p.veedorEq;
+    equipos().forEach((e) => { m[e.id] = { id: e.id, partidos: 0, fechas: new Set() }; });
+    partidos().filter((p) => (jugado(p) || enVivo(p)) && !p.wo).forEach((p) => {
+      const k = eqVeedor(p);
+      if (!k || !m[k]) return;
       m[k].partidos++; m[k].fechas.add(p.fecha);
     });
-    return Object.values(m).map((x) => ({ nombre: x.nombre, eq: x.eq, partidos: x.partidos, fechas: x.fechas.size }))
-      .sort((a, b) => b.partidos - a.partidos || b.fechas - a.fechas || a.nombre.localeCompare(b.nombre, "es"));
+    return Object.values(m).map((x) => ({ id: x.id, partidos: x.partidos, fechas: x.fechas.size }))
+      .sort((a, b) => b.partidos - a.partidos || b.fechas - a.fechas || (equipo(a.id).nombre).localeCompare(equipo(b.id).nombre, "es"));
   }
 
   /* Palitos de gol, como en la planilla: grupos de 5 (cuatro rayas y la tachada). */
@@ -379,7 +379,7 @@
     if (o.sin !== "cancha") meta.push(`<span>${esc(p.cancha)}</span>`);
     const tag = ok ? `<span class="tag">${p.wo ? "W.O." : "FINAL"}</span>` : live ? '<span class="tag vivo"><i></i>EN VIVO</span>' : '<span class="tag pend">PRÓXIMO</span>';
     let pie = "";
-    if (o.veedor && p.veedor) pie += `<p class="veedor">Veedor: ${veedorTxt(p.veedor, p.veedorEq)}</p>`;
+    if (o.veedor && (p.veedor || p.veedorEq)) pie += `<p class="veedor">Veedor: ${veedorTxt(p.veedor, p.veedorEq)}</p>`;
     if (o.detalle && (ok || live)) {
       const res = (id, gol) => {
         const { am, ro, az } = contarTarj((p.tarjetas || []).filter((x) => x.e === id));
@@ -387,6 +387,8 @@
       };
       pie += `<details${live ? " open" : ""}><summary>${res(p.local, p.golesLocal).replace('class="sm"', 'class="sm sm-l"')}<span class="chev">▾</span>${res(p.visitante, p.golesVisitante).replace('class="sm"', 'class="sm sm-v"')}</summary>${detalle(p)}</details>`;
     }
+    if (p.mvp && jugador(p.mvp)) { const mj = jugador(p.mvp), me = equipo(mj.equipo); pie = `<p class="mvp">⭐ Jugador del partido: <a href="#/jugador/${esc(mj.id)}">${esc(mj.nombre)}</a>${me ? ` <small>${esc(me.nombre)}</small>` : ""}</p>` + pie; }
+    if (ok && o.detalle) pie += `<button type="button" class="comp" data-comp="${esc(p.id)}">Compartir resultado ↗</button>`;
     return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
   }
   const tarjetaResultado = (p) => marcador(p, { detalle: true, veedor: true });
@@ -661,9 +663,20 @@
     if (!j) return vacio("No encontré ese jugador.");
     const e = equipo(j.equipo);
     const g = partidos().filter((p) => jugado(p) && (p.goles || []).some((x) => x.j === id)).sort(porFecha);
+    const tarj = partidos().filter(jugado).flatMap((p) => p.tarjetas || []).filter((x) => x.j === id);
+    const am = tarj.filter((t) => !esRoja(t) && !esAzul(t)).length, ro = tarj.filter(esRoja).length;
+    const mvps = partidos().filter((p) => jugado(p) && p.mvp === id).length;
+    const goles = golesTotal(id);
+    const foto = j.foto ? `<img class="foto" src="${esc(j.foto)}" alt="${esc(j.nombre)}">` : `<span class="figu-ini">${esc(iniciales(j.nombre))}</span>`;
     return `<a class="volver" href="#/equipo/${esc(j.equipo)}">← ${esc(e ? e.nombre : "Equipo")}</a>
-      <div class="ficha">${j.foto ? `<img class="foto" style="margin:0" src="${esc(j.foto)}" alt="">` : `<span class="badge grande">${esc(iniciales(j.nombre))}</span>`}
-        <div><h2>${esc(j.nombre)}</h2><p>${e ? esc(e.nombre) : ""}${j.numero != null ? " · #" + esc(j.numero) : ""} · ${golesTotal(id)} goles</p></div></div>
+      <div class="figu-wrap"><article class="figu">
+        <div class="figu-top"><span class="figu-n">${j.numero != null ? "#" + esc(j.numero) : "COPA PRIDE"}</span>${e ? badge(e, "med") : ""}</div>
+        <div class="figu-foto">${foto}</div>
+        <h2>${esc(j.nombre)}</h2>
+        <p class="figu-eq">${e ? esc(e.nombre) : ""}</p>
+        <ul class="figu-st"><li><b>${goles}</b>goles</li><li><b>${mvps}</b>jugador del partido</li><li><b>${am}</b>amarillas</li>${ro ? `<li><b>${ro}</b>rojas</li>` : ""}</ul>
+        <div class="figu-pie"><span>2026 · 3ª edición</span><span>by Liga Pride</span></div>
+      </article></div>
       <h2 class="titulo-sec">Partidos con gol</h2>${g.length ? `<div class="res-grid">${g.map(tarjetaResultado).join("")}</div>` : vacio("Todavía no convirtió.")}`;
   }
 
@@ -696,6 +709,13 @@
       cuerpo = fp.length ? `<ol class="rank fp-l">${fp.map((x) => { const e = equipo(x.id);
         return `<li><span class="rk">${x.rank}</span><div class="li-main">${eqLink(e)}</div><span class="tarj"><i class="t-r">${x.ro}</i><i class="t-a">${x.am}</i><i class="t-z">${x.az}</i></span></li>`; }).join("")}</ol>` : vacio("Sin datos todavía.");
       nota = "Menos rojas primero, después menos amarillas y después menos azules. Orden de las cajitas: roja, amarilla, azul.";
+    } else if (tab === "mvp") {
+      const cnt = {};
+      partidos().filter((p) => p.mvp && jugado(p)).forEach((p) => { cnt[p.mvp] = (cnt[p.mvp] || 0) + 1; });
+      const lista = rankear(Object.keys(cnt).map((id) => ({ id, n: cnt[id] })), (x) => String(x.n)).slice(0, 10);
+      cuerpo = lista.length ? `<ol class="rank">${lista.map((x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null;
+        return `<li><span class="rk">${x.rank}</span><div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? eqLink(e) : ""}</small></div><b>${x.n}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay jugadores del partido cargados.");
+      nota = "El jugador del partido lo eligen los equipos y se anota en la planilla. Cuenta cuántas veces fue elegido.";
     } else if (tab === "suspendidos") {
       const susp = (D.suspendidos || []).map((s, k) => {
         const j = jugador(s.j), e = j ? equipo(j.equipo) : null;
@@ -706,21 +726,22 @@
     } else {
       const vs = veedoresStats(), max = vs.length ? Math.max(1, vs[0].partidos) : 1;
       cuerpo = vs.length ? `<ol class="rank barras">${vs.map((x, i) => {
-        const inf = veedorInfo(x.nombre), e = (inf && inf.equipo ? equipo(inf.equipo) : null) || equipo(x.eq);
-        return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${barra(x.partidos / max * 100)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
-      nota = "Cuenta los partidos que veedó cada uno (jugados o en vivo, sin los W.O.). Los que todavía no veedaron ninguno figuran con 0.";
+        const e = equipo(x.id);
+        return `<li><span class="rk">${i + 1}</span><div class="li-main">${eqLink(e)}<small>${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${barra(x.partidos / max * 100)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
+      nota = "Cuenta los partidos que veedó cada equipo (jugados o en vivo, sin los W.O.). Los que todavía no veedaron ninguno figuran con 0.";
     }
     return { cuerpo, nota };
   }
 
   function vistaEstadisticas() {
-    const S = [["goleadores", "Goleadores"], ["valla", "Valla menos vencida"], ["fairplay", "Fair play"], ["suspendidos", "Suspendidos"], ["veedores", "Veedores"]];
+    const S = [["goleadores", "Goleadores"], ["valla", "Valla menos vencida"], ["fairplay", "Fair play"], ["mvp", "Jugador del partido"], ["suspendidos", "Suspendidos"], ["veedores", "Veedores"]];
     const sec = Object.fromEntries(S.map(([k, t]) => { const r = estSeccion(k); return [k, `<section class="est-sec" id="est-${k}"><h3 class="titulo-sec">${t}</h3><div class="est-cuerpo">${r.cuerpo}<p class="leyenda">${r.nota}</p></div></section>`]; }));
     const ir = S.map(([k, t]) => `<button class="chip" data-ir="est-${k}">${t}</button>`).join("");
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
       ${sec.goleadores}
       <div class="est-duo">${sec.valla}${sec.fairplay}</div>
-      <div class="est-duo">${sec.suspendidos}${sec.veedores}</div>`;
+      <div class="est-duo">${sec.mvp}${sec.veedores}</div>
+      <div class="est-duo">${sec.suspendidos}</div>`;
   }
 
   function vistaHistorial() {
@@ -739,6 +760,55 @@
       ${franja("plata", "Copa de Plata", x.plata)}
       <div class="hist2 hg"><div class="hc"><small>Goleador</small>${(() => { const e = (D.equipos || []).concat(D.equiposHistoricos || []).find((q) => norm(q.nombre) === norm(x.goleadorEquipo)); return e ? badge(e, "chico") : ""; })()}<span>${esc(x.goleador || "(completar)")}</span>${x.goleadorEquipo ? `<em class="hq">${esc(x.goleadorEquipo)}</em>` : ""}</div></div>
       ${x.notas ? `<p class="nota">${esc(x.notas)}</p>` : ""}</div></div>`).join("");
+  }
+
+  /* ---------------- compartir resultado (imagen para redes) ---------------- */
+  function cargarImg(src) {
+    return new Promise((ok) => { if (!src) return ok(null); const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+  }
+  async function compartirPartido(id) {
+    const p = partidos().find((x) => x.id === id);
+    if (!p) return;
+    try { await document.fonts.load("100px 'Bebas Neue'"); } catch (e) { /* sin fuente */ }
+    const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d"), DISP = "'Bebas Neue','Anton',Impact,'Arial Narrow',sans-serif", TXT = "'Archivo','Helvetica Neue',Arial,sans-serif";
+    const el = equipo(p.local), ev = equipo(p.visitante);
+    const [logo, bl, bv] = await Promise.all([cargarImg("img/logo-copa.png"), cargarImg(el && el.escudo), cargarImg(ev && ev.escudo)]);
+    let g = x.createRadialGradient(W / 2, 0, 50, W / 2, 0, 1100); g.addColorStop(0, "#2c2314"); g.addColorStop(1, "#080706");
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "rgba(200,147,42,.14)"; x.lineWidth = 4;
+    x.beginPath(); x.arc(W / 2, 700, 230, 0, 7); x.moveTo(0, 700); x.lineTo(W, 700); x.stroke();
+    const rg = x.createLinearGradient(0, 0, W, 0); ["#e40303", "#ff8c00", "#ffed00", "#008026", "#004dff", "#750787"].forEach((cc, i) => rg.addColorStop(i / 5, cc));
+    x.fillStyle = rg; x.fillRect(0, 0, W, 16); x.fillRect(0, H - 16, W, 16);
+    if (logo) { const lw = 340, lh = lw * logo.height / logo.width; x.drawImage(logo, (W - lw) / 2, 60, lw, lh); }
+    x.textAlign = "center"; x.fillStyle = "#e6bd5e"; x.font = `54px ${DISP}`;
+    x.fillText((faseLabel(p) + " · " + fechaCorta(p.fecha)).toUpperCase(), W / 2, 470);
+    const lado = (e, img, cx, nombre) => {
+      if (img) { const s = 220, r = Math.min(s / img.width, s / img.height); x.drawImage(img, cx - img.width * r / 2, 640 - img.height * r / 2, img.width * r, img.height * r); }
+      else { x.fillStyle = "#c8932a"; x.beginPath(); x.arc(cx, 640, 110, 0, 7); x.fill(); x.fillStyle = "#111"; x.font = `110px ${DISP}`; x.fillText(iniciales(nombre), cx, 678); }
+      x.fillStyle = "#f5f2ea"; x.font = `62px ${DISP}`; x.textAlign = "center";
+      const w = x.measureText(nombre.toUpperCase()).width; if (w > 340) x.font = `${Math.floor(62 * 340 / w)}px ${DISP}`;
+      x.fillText(nombre.toUpperCase(), cx, 840);
+    };
+    lado(el, bl, 200, el ? el.nombre : "Local"); lado(ev, bv, 880, ev ? ev.nombre : "Visitante");
+    x.fillStyle = "#e6bd5e"; x.font = `190px ${DISP}`; x.textAlign = "center";
+    x.fillText(`${p.golesLocal} - ${p.golesVisitante}`, W / 2, 700);
+    const pen = p.penales && p.penales.local != null ? `(pen. ${p.penales.local}-${p.penales.visitante})` : "";
+    if (pen) { x.font = `46px ${DISP}`; x.fillStyle = "#a8a398"; x.fillText(pen, W / 2, 770); }
+    const lista = (id, cx) => {
+      const m = {};
+      (p.goles || []).filter((q) => q.e === id).forEach((q) => { const j = jugador(q.j); const k = j ? j.nombre : "?"; m[k] = (m[k] || 0) + 1; });
+      x.fillStyle = "#d9d4c6"; x.font = `34px ${TXT}`; x.textAlign = "center";
+      Object.keys(m).slice(0, 7).forEach((k, i) => { const t = "⚽ " + k + (m[k] > 1 ? " ×" + m[k] : ""); x.font = `34px ${TXT}`; const w = x.measureText(t).width; if (w > 480) x.font = `${Math.floor(34 * 480 / w)}px ${TXT}`; x.fillText(t, cx, 930 + i * 46); });
+    };
+    lista(p.local, 270); lista(p.visitante, 810);
+    if (p.mvp && jugador(p.mvp)) { x.fillStyle = "#e6bd5e"; x.font = `40px ${TXT}`; x.textAlign = "center"; x.fillText("⭐ Jugador del partido: " + jugador(p.mvp).nombre, W / 2, 1255); }
+    x.fillStyle = "#a8a398"; x.font = `32px ${TXT}`; x.fillText("copapride.netlify.app  ·  Juntxs por el deporte  ·  By Liga Pride", W / 2, 1310);
+    const blob = await new Promise((r) => c.toBlob(r, "image/png"));
+    if (!blob) return;
+    const f = new File([blob], "copa-pride-resultado.png", { type: "image/png" });
+    try { if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "Copa Pride" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = "copa-pride-resultado.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
   }
 
   /* ---------------- router ---------------- */
@@ -822,8 +892,9 @@
     if (falta && window.LIGA_DATA) falta.style.display = "none";
     const app = document.getElementById("app");
     app.addEventListener("click", (ev) => {
-      const t = ev.target.closest("[data-dia],[data-vista],[data-copa],[data-est],[data-ir]");
+      const t = ev.target.closest("[data-dia],[data-vista],[data-copa],[data-est],[data-ir],[data-comp]");
       if (!t) return;
+      if (t.dataset.comp) { compartirPartido(t.dataset.comp); return; }
       if (t.dataset.ir) { const x = document.getElementById(t.dataset.ir); if (x) x.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
       if (t.dataset.dia) estadoFx.dia = t.dataset.dia;
       if (t.dataset.vista) estadoFx.vista = t.dataset.vista;
