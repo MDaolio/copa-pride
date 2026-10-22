@@ -421,21 +421,61 @@
       const dias = Math.round((d - new Date(hoy + "T12:00:00")) / 86400000);
       titulo = etiquetaFecha(prox);
       num = String(d.getDate()); mes = MESES[d.getMonth()]; dia = DIAS3[d.getDay()];
-      cuenta = dias === 0 ? "¡Se juega HOY!" : dias === 1 ? "Se juega MAÑANA" : `Faltan ${dias} días`;
+      const h0 = partidos().filter((p) => p.fecha === prox && p.hora).map((p) => p.hora).sort()[0] || "14:00";
+      cuenta = `<div class="cd" data-t="${esc(prox)}T${esc(h0)}:00-03:00"><p class="cd-k">${dias === 0 ? "Hoy · " : ""}Arranca la pelota en</p><div class="cd-t"><div><b data-u="d">00</b><span>días</span></div><div><b data-u="h">00</b><span>hs</span></div><div><b data-u="m">00</b><span>min</span></div><div><b data-u="s">00</b><span>seg</span></div></div></div>`;
     } else {
       titulo = "Terminó la Copa"; num = "FIN"; mes = ""; dia = D.estado || "Gracias por jugar";
     }
     return `<section class="cab">
-        <div class="cab-marca"><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"><p>${esc(D.lema || "")}</p></div>
+        <div class="cab-marca"><svg class="cab-cancha" viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="150" cy="100" r="46"/><path d="M0 100h300M150 0v200"/><rect x="-2" y="50" width="52" height="100"/><rect x="250" y="50" width="52" height="100"/></svg><img src="img/logo-copa.png" alt="Copa Pride 2026 · 3ª edición · by Liga Pride"><p>${esc(D.lema || "")}</p></div>
         <div class="cab-fecha">
           <p class="k">${prox ? "Próxima fecha" : "Copa Pride"}</p>
           <div class="cab-num"><b>${esc(num)}</b><span>${esc(mes)}<br>${esc(dia)}</span></div>
           <h2>${esc(titulo)}</h2>
-          ${cuenta ? `<p class="cab-cuenta">${esc(cuenta)}</p>` : ""}
+          ${cuenta}
           <p class="cab-hs">${esc(D.horario || rango)}</p>
           <div class="hero-cta"><a class="btn" href="#/fixture">Ver fixture</a><a class="btn sec" href="#/zonas">Ver zonas</a></div>
         </div>
       </section>`;
+  }
+
+  /* Cifras de la Copa */
+  function cifrasHtml(ps) {
+    const jug = ps.filter(jugado);
+    if (!jug.length) return "";
+    const goles = jug.reduce((s, p) => s + (p.golesLocal || 0) + (p.golesVisitante || 0), 0);
+    const top = rankear(goleadores(), (x) => x.goles + "|" + x.pj)[0];
+    const tj = top ? jugador(top.id) : null;
+    return `<section class="cifras">
+      <div class="cifra"><b>${goles}</b><span>goles</span></div>
+      <div class="cifra"><b>${jug.length}<small>/${ps.length}</small></b><span>partidos jugados</span></div>
+      <div class="cifra"><b>${(goles / jug.length).toFixed(1).replace(".", ",")}</b><span>goles por partido</span></div>
+      ${tj ? `<a class="cifra cifra-g" href="#/jugador/${esc(tj.id)}"><b>${top.goles}</b><span>goleador · ${esc(tj.nombre)}</span></a>` : ""}
+    </section>`;
+  }
+
+  /* Cuenta regresiva hasta el primer partido de la próxima fecha */
+  function tickCuenta() {
+    document.querySelectorAll(".cd[data-t]").forEach((el) => {
+      const t = new Date(el.dataset.t) - Date.now();
+      if (isNaN(t)) return;
+      if (t <= 0) { el.innerHTML = '<p class="cd-ya">¡Rueda la pelota!</p>'; el.removeAttribute("data-t"); return; }
+      const v = { d: Math.floor(t / 864e5), h: Math.floor(t / 36e5) % 24, m: Math.floor(t / 6e4) % 60, s: Math.floor(t / 1e3) % 60 };
+      Object.keys(v).forEach((k) => { const x = el.querySelector(`[data-u="${k}"]`); if (x) x.textContent = String(v[k]).padStart(2, "0"); });
+    });
+  }
+
+  /* Cinta de resultados (arriba de todo) */
+  function cintaHtml() {
+    const ps = partidos();
+    const nom = (id) => { const e = equipo(id); return esc(e ? e.nombre : (resolverSlot(id).texto || "?")); };
+    const it = [];
+    ps.filter(enVivo).sort(porFecha).forEach((p) => it.push(`<span class="tk"><i class="tk-t vivo">EN VIVO</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`));
+    ps.filter(jugado).sort(porFecha).reverse().slice(0, 10).forEach((p) => it.push(`<span class="tk"><i class="tk-t">FINAL</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`));
+    ps.filter((p) => !jugado(p) && !enVivo(p)).sort(porFecha).slice(0, 4).forEach((p) => it.push(`<span class="tk"><i class="tk-t pr">${esc(fechaCorta(p.fecha))} ${esc(p.hora)}</i>${nom(p.local)} vs ${nom(p.visitante)}</span>`));
+    if (!it.length) return "";
+    const h = it.join("");
+    return `<div class="tk-track" style="--d:${Math.max(30, it.length * 5)}s">${h}${h}</div>`;
   }
 
   /* Seguí a tu equipo: se guarda en el celu de cada uno (no es un dato de la liga). */
@@ -471,13 +511,19 @@
     const vivos = ps.filter(enVivo).sort(porFecha);
 
     const hero = heroInicio(fechas, rango, canchas.length, sede);
-    const sedeHtml = `<a class="sede" href="${esc(mapsLink())}" target="_blank" rel="noopener"><div><span class="kicker">¿Dónde se juega?</span><h3>${esc(sede.nombre || "Sede a confirmar")}</h3><p>${esc(sede.direccion || "")}</p></div><span class="link-oro">Cómo llegar ↗</span></a>`;
+    const sedeHtml = `<a class="sede2" href="${esc(mapsLink())}" target="_blank" rel="noopener">
+      <svg class="sede-cancha" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect x="12" y="12" width="376" height="176" rx="6"/><path d="M200 12v176"/><circle cx="200" cy="100" r="34"/><rect x="12" y="62" width="48" height="76"/><rect x="340" y="62" width="48" height="76"/><path d="M12 82h22v36H12zM366 82h22v36h-22z"/></svg>
+      <span class="sede-pin"><i></i><b></b></span>
+      <div class="sede2-in"><span class="kicker">¿Dónde se juega?</span><h3>${esc(sede.nombre || "Sede a confirmar")}</h3><p>${esc(sede.direccion || "")}</p>
+        <ul class="sede2-ch">${canchas.length ? `<li><b>${canchas.length}</b>canchas</li>` : ""}${D.horario ? `<li>${esc(D.horario)}</li>` : ""}</ul>
+        <span class="btn sec sede2-b">Cómo llegar ↗</span></div></a>`;
     return `${hero}
       ${miEquipoHtml()}
+      ${cifrasHtml(ps)}
       ${vivos.length ? `<h2 class="titulo-sec">En vivo ahora</h2><div class="res-grid">${vivos.map(tarjetaLista).join("")}</div>` : ""}
       <h2 class="titulo-sec">Últimos resultados</h2>
       ${ult.length ? `<div class="res-grid">${ult.map(tarjetaResultado).join("")}</div>` : vacio("Todavía no hay resultados cargados.")}
-      ${llaves().length ? `<h2 class="titulo-sec">Campeones</h2><div class="camp-grid">${camps}</div>` : ""}
+      ${llaves().some((c) => campeonDe(c)) ? `<h2 class="titulo-sec">Campeones</h2><div class="camp-grid">${camps}</div>` : ""}
       ${sedeHtml}`;
   }
 
@@ -623,15 +669,12 @@
 
   const estadoEst = { tab: "goleadores" };
 
-  function vistaEstadisticas() {
-    const tabs = [["goleadores", "Goleadores"], ["valla", "Valla menos vencida"], ["fairplay", "Fair play"], ["suspendidos", "Suspendidos"], ["veedores", "Veedores"]];
-    if (!tabs.some((t) => t[0] === estadoEst.tab)) estadoEst.tab = "goleadores";
-    const chips = tabs.map(([k, n]) => `<button class="chip ${k === estadoEst.tab ? "on" : ""}" data-est="${k}">${n}</button>`).join("");
+  function estSeccion(tab) {
     const barra = (pct) => `<i class="barra"><b style="width:${Math.max(4, Math.min(100, pct)).toFixed(1)}%"></b></i>`;
     const eqLink = (e) => e ? `<a class="celda-eq" href="#/equipo/${esc(e.id)}">${badge(e, "chico")}<span>${esc(e.nombre)}</span></a>` : "";
     let cuerpo = "", nota = "";
 
-    if (estadoEst.tab === "goleadores") {
+    if (tab === "goleadores") {
       const lista = rankear(goleadores(), (x) => x.goles + "|" + x.pj).filter((x) => x.rank <= 15).slice(0, 15);
       const max = lista.length ? lista[0].goles : 1;
       const fila = (x) => { const j = jugador(x.id), e = j ? equipo(j.equipo) : null; return { x, j, e }; };
@@ -642,18 +685,18 @@
       const resto = lista.slice(3).map((x) => { const { j, e } = fila(x); return `<li><span class="rk">${x.rank}</span><div class="li-main"><a href="#/jugador/${esc(x.id)}">${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""} · ${x.pj} PJ</small></div>${barra(x.goles / max * 100)}<b>${x.goles}</b></li>`; }).join("");
       cuerpo = lista.length ? podio + (resto ? `<ol class="rank barras">${resto}</ol>` : "") : vacio("Todavía no hay goles cargados.");
       nota = (D.estadisticasSoloZona ? "Cuenta solo la fase de zonas" : "Cuenta todo el torneo (zonas, cuartos, semis, final y 3er puesto)") + ". Los goles de las definiciones por penales no suman. Si empatan en goles, va primero el que jugó menos partidos; si siguen iguales, comparten el puesto.";
-    } else if (estadoEst.tab === "valla") {
+    } else if (tab === "valla") {
       const vr = rankear(valla(), (x) => x.prom.toFixed(6) + "|" + x.dist + "|" + x.gr).filter((x) => x.rank <= 10);
       const peor = vr.reduce((m, x) => Math.max(m, x.prom), 0) || 1;
       cuerpo = vr.length ? `<ol class="rank barras valla-l">${vr.map((x) => { const e = equipo(x.id);
         return `<li><span class="rk">${x.rank}</span><div class="li-main"><span>${arqueroDe(x.id)}</span><small>${eqLink(e)}</small></div>${barra((1 - x.prom / (peor * 1.2)) * 100)}<div class="vl-n"><b>${promTxt(x.prom)}</b><small>${x.gr} GR · ${x.pj} PJ</small></div></li>`; }).join("")}</ol>` : vacio("Sin datos todavía.");
       nota = "Promedio = goles recibidos por el equipo ÷ partidos jugados; gana el más bajo y el premio es para el arquero titular del equipo (el que más partidos atajó). Cuenta todo el torneo. No cuentan los penales de definición ni los partidos por W.O., y los equipos que abandonan no figuran. Si empatan, va primero el que llegó más lejos y después el que recibió menos goles en total.";
-    } else if (estadoEst.tab === "fairplay") {
+    } else if (tab === "fairplay") {
       const fp = rankear(fairPlay().slice(0, 10), (x) => x.pts);
       cuerpo = fp.length ? `<ol class="rank fp-l">${fp.map((x) => { const e = equipo(x.id);
         return `<li><span class="rk">${x.rank}</span><div class="li-main">${eqLink(e)}</div><span class="tarj"><i class="t-r">${x.ro}</i><i class="t-a">${x.am}</i><i class="t-z">${x.az}</i></span></li>`; }).join("")}</ol>` : vacio("Sin datos todavía.");
       nota = "Menos rojas primero, después menos amarillas y después menos azules. Orden de las cajitas: roja, amarilla, azul.";
-    } else if (estadoEst.tab === "suspendidos") {
+    } else if (tab === "suspendidos") {
       const susp = (D.suspendidos || []).map((s, k) => {
         const j = jugador(s.j), e = j ? equipo(j.equipo) : null;
         return `<li><span class="rk">${k + 1}</span><div class="li-main"><a href="#/jugador/${esc(s.j)}">${j && j.numero != null ? "#" + esc(j.numero) + " " : ""}${esc(j ? j.nombre : "?")}</a><small>${e ? esc(e.nombre) : ""}${s.motivo ? " · " + esc(s.motivo) : ""}</small></div></li>`;
@@ -667,9 +710,18 @@
         return `<li><span class="rk">${i + 1}</span><div class="li-main">${esc(x.nombre)}<small>${e ? eqLink(e) : "Sin equipo cargado"} · ${x.fechas} ${x.fechas === 1 ? "fecha" : "fechas"}</small></div>${barra(x.partidos / max * 100)}<b>${x.partidos}</b></li>`; }).join("")}</ol>` : vacio("Todavía no hay veedores cargados.");
       nota = "Cuenta los partidos que veedó cada uno (jugados o en vivo, sin los W.O.). Los que todavía no veedaron ninguno figuran con 0.";
     }
+    return { cuerpo, nota };
+  }
+
+  function vistaEstadisticas() {
+    const S = [["goleadores", "Goleadores"], ["valla", "Valla menos vencida"], ["fairplay", "Fair play"], ["suspendidos", "Suspendidos"], ["veedores", "Veedores"]];
+    const sec = Object.fromEntries(S.map(([k, t]) => { const r = estSeccion(k); return [k, `<section class="est-sec" id="est-${k}"><h3 class="titulo-sec">${t}</h3><div class="est-cuerpo">${r.cuerpo}<p class="leyenda">${r.nota}</p></div></section>`]; }));
+    const ir = S.map(([k, t]) => `<button class="chip" data-ir="est-${k}">${t}</button>`).join("");
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
-      <div class="filtros est-tabs">${chips}</div>
-      <section class="est-cuerpo">${cuerpo}<p class="leyenda">${nota}</p></section>`;
+      <div class="filtros est-tabs">${ir}</div>
+      ${sec.goleadores}
+      <div class="est-duo">${sec.valla}${sec.fairplay}</div>
+      <div class="est-duo">${sec.suspendidos}${sec.veedores}</div>`;
   }
 
   function vistaHistorial() {
@@ -708,6 +760,9 @@
       default: html = vistaInicio();
     }
     document.getElementById("app").innerHTML = html;
+    const tk = document.getElementById("ticker");
+    if (tk) { const h = cintaHtml(); if (tk._h !== h) { tk._h = h; tk.innerHTML = h; } tk.hidden = !h; }
+    tickCuenta();
     const activa = { equipo: "equipos", jugador: "equipos" }[pagina] || pagina || "inicio";
     document.querySelectorAll("#nav a, #tabbar a").forEach((a) => a.classList.toggle("on", a.dataset.p === activa));
     const mas = document.getElementById("mas");
@@ -768,8 +823,9 @@
     if (falta && window.LIGA_DATA) falta.style.display = "none";
     const app = document.getElementById("app");
     app.addEventListener("click", (ev) => {
-      const t = ev.target.closest("[data-dia],[data-vista],[data-copa],[data-est]");
+      const t = ev.target.closest("[data-dia],[data-vista],[data-copa],[data-est],[data-ir]");
       if (!t) return;
+      if (t.dataset.ir) { const x = document.getElementById(t.dataset.ir); if (x) x.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
       if (t.dataset.dia) estadoFx.dia = t.dataset.dia;
       if (t.dataset.vista) estadoFx.vista = t.dataset.vista;
       if (t.dataset.est) estadoEst.tab = t.dataset.est;
@@ -781,6 +837,7 @@
       if (ev.target.matches("[data-mi]")) { try { localStorage.setItem("copaMiEq", ev.target.value); } catch (e) { /* sin storage */ } render(true); }
     });
     window.addEventListener("hashchange", () => render(false));
+    setInterval(tickCuenta, 1000);
     render(false);
     iniciarRemoto();
   }
