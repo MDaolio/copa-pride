@@ -44,25 +44,25 @@ window.LIGA_DATA = {
   // ---------------------------------------------------------------
   equipos: [
     // Zona A
-    { id: "e1", nombre: "Aguará Guazú", zona: "A", escudo: "img/escudos/aguara.png", cabeza: 1 },
-    { id: "e2", nombre: "Panteras KFC", zona: "A", escudo: "img/escudos/panteras-kfc.png" },
-    { id: "e6", nombre: "Crisol", zona: "A", escudo: "img/escudos/crisol.png" },
-    { id: "e7", nombre: "Escorpiones", zona: "A", escudo: "img/escudos/escorpiones.png" },
+    { id: "e1", nombre: "Aguará Guazú", zona: "A", escudo: "img/escudos/aguara.png", cabeza: 1, colores: ["#26c6e8", "#0a3d52"] },
+    { id: "e2", nombre: "Panteras KFC", zona: "A", escudo: "img/escudos/panteras-kfc.png", colores: ["#1a1408", "#b07d16"] },
+    { id: "e6", nombre: "Crisol", zona: "A", escudo: "img/escudos/crisol.png", colores: ["#e8590c", "#4a1a0a"] },
+    { id: "e7", nombre: "Escorpiones", zona: "A", escudo: "img/escudos/escorpiones.png", colores: ["#e0141a", "#1a0405"] },
     // Zona B
-    { id: "e5", nombre: "DOGOS F5", zona: "B", escudo: "img/escudos/e2.png", cabeza: 2 },
-    { id: "e3", nombre: "FGR", zona: "B", escudo: "img/escudos/e1.png" },
-    { id: "e12", nombre: "Grindr", zona: "B", escudo: "img/escudos/grindr.png" },
-    { id: "e14", nombre: "Fenix", zona: "B", escudo: "img/escudos/fenix.png" },
+    { id: "e5", nombre: "DOGOS F5", zona: "B", escudo: "img/escudos/e2.png", cabeza: 2, colores: ["#4fb3ff", "#0f3a7a"] },
+    { id: "e3", nombre: "FGR", zona: "B", escudo: "img/escudos/e1.png", colores: ["#e86aa5", "#3a86ff"] },
+    { id: "e12", nombre: "Grindr", zona: "B", escudo: "img/escudos/grindr.png", colores: ["#ff4d4d", "#ffb000", "#34c759", "#2d9cff", "#9b59f6"] },
+    { id: "e14", nombre: "Fenix", zona: "B", escudo: "img/escudos/fenix.png", colores: ["#ff7a00", "#111111"] },
     // Zona C
-    { id: "e9", nombre: "Red Aguará", zona: "C", escudo: "img/escudos/red.png", cabeza: 3 },
-    { id: "e10", nombre: "Yacares BA", zona: "C", escudo: "img/escudos/yacares.png" },
-    { id: "e11", nombre: "Huemules", zona: "C", escudo: "img/escudos/huemules.png" },
-    { id: "e8", nombre: "Impulse", zona: "C", escudo: "img/escudos/impulse.png" },
+    { id: "e9", nombre: "Red Aguará", zona: "C", escudo: "img/escudos/red.png", cabeza: 3, colores: ["#e32017", "#ffb700"] },
+    { id: "e10", nombre: "Yacares BA", zona: "C", escudo: "img/escudos/yacares.png", colores: ["#0e9aa7", "#05181a"] },
+    { id: "e11", nombre: "Huemules", zona: "C", escudo: "img/escudos/huemules.png", colores: ["#6b1d12", "#b8651b"] },
+    { id: "e8", nombre: "Impulse", zona: "C", escudo: "img/escudos/impulse.png", colores: ["#ff4d4d", "#ffb000", "#34c759", "#2d9cff", "#9b59f6"] },
     // Zona D
-    { id: "e13", nombre: "Panteras FC", zona: "D", escudo: "img/escudos/panteras.png", cabeza: 4 },
-    { id: "e4", nombre: "Cruzados", zona: "D", escudo: "img/escudos/cruzados.png" },
-    { id: "e15", nombre: "Tigres", zona: "D", escudo: "img/escudos/tigres.png" },
-    { id: "e16", nombre: "Apex Aguará", zona: "D", escudo: "img/escudos/apex-aguara.png" }
+    { id: "e13", nombre: "Panteras FC", zona: "D", escudo: "img/escudos/panteras.png", cabeza: 4, colores: ["#0d0d0d", "#e2b13c"] },
+    { id: "e4", nombre: "Cruzados", zona: "D", escudo: "img/escudos/cruzados.png", colores: ["#1e63d6", "#0b2a66"] },
+    { id: "e15", nombre: "Tigres", zona: "D", escudo: "img/escudos/tigres.png", colores: ["#f28a00", "#0e0e0e"] },
+    { id: "e16", nombre: "Apex Aguará", zona: "D", escudo: "img/escudos/apex-aguara.png", colores: ["#ff5fa8", "#7a1a52"] }
   ],
 
   // ---------------------------------------------------------------

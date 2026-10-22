@@ -889,6 +889,8 @@
     const cuerpo = `<div class="gfx-conf">${confetiHtml()}</div>
       <div class="gfx-in"><div class="gfx-esc">${badge(e, "grande")}</div>
         <div class="gfx-t"><strong>¡GOOOL!</strong><span class="gfx-eq">de ${esc(e.nombre)}</span>${j ? `<span class="gfx-j">${esc(j.nombre)}</span>` : ""}<span class="gfx-m">${marc}</span></div></div>`;
+    const cs = (e.colores && e.colores.length ? e.colores : ["#e6bd5e", "#6b4a0c"]);
+    const fondo = `radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.38),rgba(0,0,0,0) 72%),linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 38%),linear-gradient(120deg,${cs.join(",")})`;
     const cards = [...document.querySelectorAll(`.mt[data-id="${p.id}"]`)];
     const card = cards.find((c) => { const r = c.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; }) || null;
     trompeta();
@@ -896,6 +898,7 @@
       card.classList.add("gol-reciente");
       const ov = document.createElement("div");
       ov.className = "gfx";
+      ov.style.background = fondo;
       ov.innerHTML = cuerpo;
       card.appendChild(ov);
       setTimeout(() => ov.classList.add("sale"), 4300);
@@ -904,6 +907,7 @@
     } else {
       const t = document.createElement("div");
       t.className = "gfx gfx-toast";
+      t.style.background = fondo;
       t.innerHTML = cuerpo;
       document.body.appendChild(t);
       setTimeout(() => t.classList.add("sale"), 4300);
@@ -912,11 +916,14 @@
   }
   function festejar(lista) { lista.forEach((ev, i) => setTimeout(() => festejarUno(ev), i * 5200)); }
   function demoGol() {
-    const c = document.querySelector(".mt.fin[data-id]") || document.querySelector(".mt[data-id]");
-    const p = c ? partidos().find((x) => x.id === c.dataset.id) : partidos().find(jugado);
-    if (!p) return;
-    const g = (p.goles || []).find((q) => q.j) || { e: p.local, j: "" };
-    festejar([{ id: p.id, e: g.e, j: g.j }]);
+    // Simulación: un gol en el primer resultado y, después, uno en el de al lado.
+    const cards = [...document.querySelectorAll(".mt.fin[data-id]")].slice(0, 2);
+    const lista = cards.map((c) => {
+      const p = partidos().find((x) => x.id === c.dataset.id);
+      const g = ((p && p.goles) || []).find((q) => q.j) || { e: p && p.local, j: "" };
+      return { id: c.dataset.id, e: g.e, j: g.j };
+    });
+    festejar(lista);
   }
 
   /* ---------------- resultados en vivo (Google Sheets) ---------------- */
