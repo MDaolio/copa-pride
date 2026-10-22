@@ -266,36 +266,132 @@ window.LIGA_DATA = {
 
     // ----- Fecha 1 (sorteo del 15/10) -----
     { id: "m1", fase: "Zona", zona: "C", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 1",
-      local: "e9", visitante: "e8", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e9", visitante: "e8", golesLocal: 4, golesVisitante: 2,
+      goles: [
+        { j: "p43", e: "e9" },
+        { j: "p43", e: "e9" },
+        { j: "p43", e: "e9" },
+        { j: "p129", e: "e9" },
+        { j: "p38", e: "e8" },
+        { j: "p126", e: "e8" }
+      ],
+      tarjetas: [] },
 
     { id: "m2", fase: "Zona", zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 2",
-      local: "e13", visitante: "e16", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e13", visitante: "e16", golesLocal: 7, golesVisitante: 1,
+      goles: [
+        { j: "p64", e: "e13" },
+        { j: "p65", e: "e13" },
+        { j: "p65", e: "e13" },
+        { j: "p141", e: "e13" },
+        { j: "p142", e: "e13" },
+        { j: "p142", e: "e13" },
+        { j: "p145", e: "e13" },
+        { j: "p79", e: "e16" }
+      ],
+      tarjetas: [
+        { j: "p150", e: "e16", t: "A" }
+      ] },
 
     { id: "m3", fase: "Zona", zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 3",
-      local: "e4", visitante: "e15", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e4", visitante: "e15", golesLocal: 2, golesVisitante: 2,
+      goles: [
+        { j: "p327", e: "e4" },
+        { j: "p331", e: "e4" },
+        { j: "p81", e: "e15" },
+        { j: "p81", e: "e15" }
+      ],
+      tarjetas: [
+        { j: "p323", e: "e4", t: "A" }
+      ] },
 
     { id: "m4", fase: "Zona", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 1",
-      local: "e5", visitante: "e14", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e5", visitante: "e14", golesLocal: 5, golesVisitante: 5,
+      goles: [
+        { j: "p22", e: "e5" },
+        { j: "p96", e: "e5" },
+        { j: "p96", e: "e5" },
+        { j: "p340", e: "e5" },
+        { j: "p340", e: "e5" },
+        { j: "p69", e: "e14" },
+        { j: "p69", e: "e14" },
+        { j: "p210", e: "e14" },
+        { j: "p210", e: "e14" },
+        { j: "p210", e: "e14" }
+      ],
+      tarjetas: [
+        { j: "p96", e: "e5", t: "A" },
+        { j: "p67", e: "e14", t: "A" },
+        { j: "p69", e: "e14", t: "A" },
+        { j: "p70", e: "e14", t: "A" }
+      ] },
 
     { id: "m5", fase: "Zona", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 2",
-      local: "e3", visitante: "e12", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e3", visitante: "e12", golesLocal: 3, golesVisitante: 7,
+      goles: [
+        { j: "p306", e: "e3" },
+        { j: "p308", e: "e3" },
+        { j: "p310", e: "e3" },
+        { j: "p58", e: "e12" },
+        { j: "p58", e: "e12" },
+        { j: "p59", e: "e12" },
+        { j: "p59", e: "e12" },
+        { j: "p59", e: "e12" },
+        { j: "p136", e: "e12" },
+        { j: "p137", e: "e12" }
+      ],
+      tarjetas: [
+        { j: "p301", e: "e3", t: "A" },
+        { j: "p302", e: "e3", t: "A" }
+      ] },
 
     { id: "m6", fase: "Zona", zona: "A", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 3",
-      local: "e2", visitante: "e6", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e2", visitante: "e6", golesLocal: 1, golesVisitante: 6,
+      goles: [
+        { j: "p9", e: "e2" },
+        { j: "p112", e: "e6" },
+        { j: "p112", e: "e6" },
+        { j: "p112", e: "e6" },
+        { j: "p114", e: "e6" },
+        { j: "p114", e: "e6" },
+        { j: "p114", e: "e6" }
+      ],
+      tarjetas: [
+        { j: "p120", e: "e2", t: "A" }
+      ] },
 
     { id: "m7", fase: "Zona", zona: "C", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 1",
-      local: "e10", visitante: "e11", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e10", visitante: "e11", golesLocal: 0, golesVisitante: 2,
+      goles: [
+        { j: "p55", e: "e11" },
+        { j: "p109", e: "e11" }
+      ],
+      tarjetas: [] },
 
     { id: "m8", fase: "Zona", zona: "A", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 3",
-      local: "e1", visitante: "e7", golesLocal: null, golesVisitante: null,
-      goles: [], tarjetas: [] },
+      local: "e1", visitante: "e7", golesLocal: 18, golesVisitante: 1,
+      goles: [
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p5", e: "e1" },
+        { j: "p201", e: "e1" },
+        { j: "p201", e: "e1" },
+        { j: "p201", e: "e1" },
+        { j: "p201", e: "e1" },
+        { j: "p202", e: "e1" },
+        { j: "p202", e: "e1" },
+        { j: "p2", e: "e1" },
+        { j: "p203", e: "e1" },
+        { j: "p35", e: "e7" }
+      ],
+      tarjetas: [] },
 
     // ----- Fecha 2 (sorteo del 15/10) -----
     { id: "m9", fase: "Zona", zona: "A", fecha: "2026-10-24", hora: "14:00", cancha: "Cancha 1",
