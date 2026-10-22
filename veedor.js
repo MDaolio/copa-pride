@@ -216,13 +216,13 @@
     }
     detenerLista();
     const x = r.partido;
-    M = { id, p, estado: x.estado || "EN_JUEGO", goles: x.goles || [], tarjetas: x.tarjetas || [],
+    M = { id, p, mvp: x.mvp || "", estado: x.estado || "EN_JUEGO", goles: x.goles || [], tarjetas: x.tarjetas || [],
           pl: x.pl === "" || x.pl == null ? null : Number(x.pl), pv: x.pv === "" || x.pv == null ? null : Number(x.pv), guardado: "ok" };
     // Si quedó algo sin enviar en este celular (se cortó la conexión), se recupera.
     try {
       const d = JSON.parse(ls.get("cp_draft_" + id) || "null");
       if (d && d.sent === false && d.nombre === S.nombre && d.disp === S.disp) {
-        Object.assign(M, { estado: d.estado, goles: d.goles, tarjetas: d.tarjetas, pl: d.pl, pv: d.pv });
+        Object.assign(M, { estado: d.estado, goles: d.goles, tarjetas: d.tarjetas, pl: d.pl, pv: d.pv, mvp: d.mvp || M.mvp });
         guardarYa();
       }
     } catch (e) { /* borrador roto: se ignora */ }
@@ -297,6 +297,8 @@
       ${final ? `<p class="vfinal">Partido finalizado ✓ (${cuenta("L")} - ${cuenta("V")}${M.pl != null && M.pv != null ? `, penales ${M.pl} - ${M.pv}` : ""})</p>` : ""}
       <div class="vpaneles">${panelEquipo("L")}${panelEquipo("V")}</div>
       ${penalesHtml()}
+      <section class="vcaja"><h3>⭐ Jugador del partido</h3><p class="vtxt">${M.mvp ? `<b>${jugadorTxt(M.mvp)}</b>` : "Todavía no elegido. Los equipos lo eligen al terminar: anotalo antes de finalizar."}</p>
+        <button type="button" class="vbtn" data-act="mvp" ${final ? "disabled" : ""}>${M.mvp ? "Cambiar jugador del partido" : "Elegir jugador del partido"}</button></section>
       <section class="vcaja"><h3>Qué pasó</h3><ul class="vev">${eventos()}</ul></section>
       <div class="vfin">
         ${final
@@ -331,15 +333,37 @@
     document.body.appendChild(ov);
   }
 
+  function selectorMvp() {
+    const ov = document.createElement("div");
+    ov.className = "vov";
+    const grupo = (lado) => {
+      const eqId = idsDe()[lado];
+      const jug = A.jugadores().filter((j) => j.equipo === eqId).sort((a, b) => (a.numero || 99) - (b.numero || 99));
+      return `<p class="vtxt"><b>${esc(nombreEq(lado))}</b></p><div class="vjug">${jug.map((j) => `<button type="button" class="vbtn jug" data-j="${esc(j.id)}">${j.numero != null ? `<b>#${esc(j.numero)}</b>` : ""} ${esc(j.nombre)}</button>`).join("")}</div>`;
+    };
+    ov.innerHTML = `<div class="vsheet" role="dialog" aria-modal="true"><h3>Jugador del partido</h3>${grupo("L")}${grupo("V")}
+      <div class="vjug"><button type="button" class="vbtn jug sin" data-j="">Sacar / ninguno</button></div>
+      <button type="button" class="vbtn sec" data-cerrar="1">Cancelar</button></div>`;
+    ov.addEventListener("click", (ev) => {
+      const b = ev.target.closest("button");
+      if (ev.target === ov || (b && b.dataset.cerrar)) { ov.remove(); return; }
+      if (!b || b.dataset.j === undefined) return;
+      M.mvp = b.dataset.j;
+      ov.remove();
+      cambio();
+    });
+    document.body.appendChild(ov);
+  }
+
   /* ---------------- guardado automático ---------------- */
   function snapshot() {
     const gl = cuenta("L"), gv = cuenta("V");
     const pen = esPlayoff() && gl === gv && M.pl != null && M.pv != null;
-    return { id: M.id, estado: M.estado, gl, gv, pl: pen ? M.pl : null, pv: pen ? M.pv : null, goles: M.goles, tarjetas: M.tarjetas };
+    return { id: M.id, estado: M.estado, gl, gv, pl: pen ? M.pl : null, pv: pen ? M.pv : null, goles: M.goles, tarjetas: M.tarjetas, mvp: M.mvp || "" };
   }
 
   function guardarBorrador(sent) {
-    ls.set("cp_draft_" + M.id, JSON.stringify({ nombre: S.nombre, disp: S.disp, sent, estado: M.estado, goles: M.goles, tarjetas: M.tarjetas, pl: M.pl, pv: M.pv }));
+    ls.set("cp_draft_" + M.id, JSON.stringify({ nombre: S.nombre, disp: S.disp, sent, estado: M.estado, goles: M.goles, tarjetas: M.tarjetas, pl: M.pl, pv: M.pv, mvp: M.mvp || "" }));
   }
 
   function cambio() { guardarBorrador(false); pintarPartido(); guardarYa(); }
@@ -381,6 +405,7 @@
       return;
     }
     const pen = esPlayoff() && gl === gv ? ` (penales ${M.pl} - ${M.pv})` : "";
+    if (!M.mvp && !confirm("Todavía no elegiste el Jugador del partido.\n\nDespués de finalizar ya no vas a poder cargarlo. ¿Finalizar igual?")) return;
     if (!confirm(`${nombreEq("L")} ${gl} - ${gv} ${nombreEq("V")}${pen}\n\n¿Finalizar el partido? Después podés reabrirlo para corregir.`)) return;
     M.estado = "FINAL"; cambio();
   }
@@ -415,6 +440,7 @@
       M[k] = Math.max(0, Math.min(99, M[k] + (m[2] === "+" ? 1 : -1)));
       return cambio();
     }
+    if (a === "mvp") return selectorMvp();
     if (a === "finalizar") return finalizar();
     if (a === "reabrir") { if (!S.admin) return; M.estado = "EN_JUEGO"; return cambio(); }
     if (a === "lista") return volverALista(false);

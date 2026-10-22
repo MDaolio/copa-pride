@@ -24,7 +24,7 @@ var HOJA_PARTIDOS = "Partidos";
 var HOJA_CONFIG = "Config";
 var HOJA_PINS = "PINs";
 var COLUMNAS = ["id", "estado", "golesLocal", "golesVisitante", "penLocal", "penVisitante",
-                "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp"];
+                "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp", "mvp"];
 var MIN_ANTES = 10;           // el PIN de un partido se activa tantos minutos antes de su hora
 var MIN_DESPUES = 60;         // y vence tantos minutos después de su hora de inicio
 var MIN_PRUEBA = 240;         // duración de los PINs en una jornada de PRUEBA
@@ -308,7 +308,7 @@ function err_(msg, codigo) { return { ok: false, error: msg, codigo: codigo || "
 function publico_(r) {
   return {
     estado: r.estado, gl: r.golesLocal, gv: r.golesVisitante, pl: r.penLocal, pv: r.penVisitante,
-    goles: parse_(r.goles), tarjetas: parse_(r.tarjetas), veedor: r.veedor || "", veedorEq: r.veedorEq || "",
+    goles: parse_(r.goles), tarjetas: parse_(r.tarjetas), veedor: r.veedor || "", veedorEq: r.veedorEq || "", mvp: r.mvp || "",
     lock: Number(r.lockHasta) > ahora_().getTime(), t: r.actualizado
   };
 }
@@ -390,6 +390,10 @@ function guardar_(d, v) {
   var goles = listaValida_(d.goles || [], 99, false), tarjetas = listaValida_(d.tarjetas || [], 60, true);
   if (!goles || !tarjetas) return err_("Detalle de goles o tarjetas inválido.");
 
+  // Jugador del partido (opcional): id del jugador, o vacío.
+  var mvp = (d.mvp === undefined || d.mvp === null) ? null : String(d.mvp);
+  if (mvp !== null && !/^[A-Za-z0-9_-]{0,20}$/.test(mvp)) return err_("Jugador del partido inválido.");
+
   var mapa = leerPartidos_(), r = mapa[id];
   var mio = r && (r.disp ? String(r.disp) === String(d.disp) : r.veedor === nombre);
   if (!mio)
@@ -399,6 +403,7 @@ function guardar_(d, v) {
   r.golesLocal = gl; r.golesVisitante = gv;
   r.penLocal = pl === null ? "" : pl; r.penVisitante = pv === null ? "" : pv;
   r.goles = JSON.stringify(goles); r.tarjetas = JSON.stringify(tarjetas);
+  if (mvp !== null) r.mvp = mvp;
   r.lockHasta = estado === "FINAL" ? 0 : ahora_().getTime() + MINUTOS_BLOQUEO * 60000;
   r.actualizado = ahora_().toISOString();
   escribirFila_(r, r._fila);
