@@ -389,7 +389,7 @@
     }
     if (p.mvp && jugador(p.mvp)) { const mj = jugador(p.mvp), me = equipo(mj.equipo); pie = `<p class="mvp">⭐ Jugador del partido: <a href="#/jugador/${esc(mj.id)}">${esc(mj.nombre)}</a>${me ? ` <small>${esc(me.nombre)}</small>` : ""}</p>` + pie; }
     if (ok && o.detalle) pie += `<button type="button" class="comp" data-comp="${esc(p.id)}">Compartir resultado ↗</button>`;
-    return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
+    return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}" data-id="${esc(p.id)}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
   }
   const tarjetaResultado = (p) => marcador(p, { detalle: true, veedor: true });
   const tarjetaLista = (p) => marcador(p, { detalle: true, veedor: true });
@@ -825,21 +825,104 @@
       case "jugador": html = vistaJugador(arg); break;
       case "estadisticas": html = vistaEstadisticas(); break;
       case "historial": html = vistaHistorial(); break;
+      case "demo-gol": html = vistaInicio(); setTimeout(demoGol, 900); break;
       default: html = vistaInicio();
     }
     document.getElementById("app").innerHTML = html;
     const tk = document.getElementById("ticker");
     if (tk) { const h = cintaHtml(); if (tk._h !== h) { tk._h = h; tk.innerHTML = h; } tk.hidden = !h; }
     tickCuenta();
-    const activa = { equipo: "equipos", jugador: "equipos" }[pagina] || pagina || "inicio";
+    const activa = { equipo: "equipos", jugador: "equipos", "demo-gol": "inicio" }[pagina] || pagina || "inicio";
     document.querySelectorAll("#nav a, #tabbar a").forEach((a) => a.classList.toggle("on", a.dataset.p === activa));
     const mas = document.getElementById("mas");
     if (mas) { mas.open = false; mas.classList.toggle("on", ["equipos", "estadisticas", "historial"].includes(activa)); }
     if (!mantener) window.scrollTo(0, 0);
   }
 
+  /* ---------------- ¡GOOOL! festejo en la tarjeta del partido ---------------- */
+  let audioCtx = null;
+  const sonidoOn = () => { try { return localStorage.getItem("copaSonido") !== "0"; } catch (e) { return true; } };
+  function desbloquearAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) { /* sin audio */ }
+  }
+  /* Trompetita sintetizada: "pim, pirí-rim, pirí-rim…" */
+  function trompeta() {
+    if (!sonidoOn() || !audioCtx || audioCtx.state !== "running") return;
+    const t0 = audioCtx.currentTime + 0.03;
+    const N = [[523.25, 0, .11], [659.25, .13, .11], [783.99, .26, .11], [1046.5, .4, .3],
+               [783.99, .78, .11], [1046.5, .91, .11], [783.99, 1.04, .11], [1046.5, 1.17, .45],
+               [1046.5, 1.75, .11], [1318.5, 1.88, .11], [1568, 2.01, .6]];
+    N.forEach(([f, t, d]) => {
+      const out = audioCtx.createGain(), fil = audioCtx.createBiquadFilter();
+      fil.type = "bandpass"; fil.frequency.value = f * 1.6; fil.Q.value = 0.8;
+      out.gain.setValueAtTime(0.0001, t0 + t);
+      out.gain.exponentialRampToValueAtTime(0.32, t0 + t + 0.025);
+      out.gain.exponentialRampToValueAtTime(0.0001, t0 + t + d + 0.08);
+      [["sawtooth", 1], ["square", 2]].forEach(([tipo, mul]) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = tipo; o.frequency.value = f * (mul === 2 ? 1.003 : 1); g.gain.value = mul === 2 ? 0.35 : 0.65;
+        o.connect(g); g.connect(fil); o.start(t0 + t); o.stop(t0 + t + d + 0.12);
+      });
+      fil.connect(out); out.connect(audioCtx.destination);
+    });
+  }
+
+  function confetiHtml() {
+    const cols = ["#e40303", "#ff8c00", "#ffed00", "#008026", "#004dff", "#750787", "#e6bd5e", "#ffffff"];
+    let h = "";
+    for (let i = 0; i < 44; i++) {
+      const l = Math.round(Math.random() * 100), d = (Math.random() * 0.9).toFixed(2), s = (1.8 + Math.random() * 1.6).toFixed(2), r = Math.round(Math.random() * 720 - 360), w = 6 + Math.round(Math.random() * 6);
+      h += `<i style="left:${l}%;background:${cols[i % cols.length]};animation-delay:${d}s;animation-duration:${s}s;--r:${r}deg;width:${w}px;height:${w * 1.5}px"></i>`;
+    }
+    return h;
+  }
+
+  function festejarUno(ev) {
+    const p = partidos().find((x) => x.id === ev.id), e = equipo(ev.e), j = ev.j ? jugador(ev.j) : null;
+    if (!p || !e) return;
+    const marc = `${esc((equipo(p.local) || {}).nombre || "")} <b>${esc(p.golesLocal)}</b> – <b>${esc(p.golesVisitante)}</b> ${esc((equipo(p.visitante) || {}).nombre || "")}`;
+    const cuerpo = `<div class="gfx-conf">${confetiHtml()}</div>
+      <div class="gfx-in"><div class="gfx-esc">${badge(e, "grande")}</div>
+        <div class="gfx-t"><strong>¡GOOOL!</strong><span class="gfx-eq">de ${esc(e.nombre)}</span>${j ? `<span class="gfx-j">${esc(j.nombre)}</span>` : ""}<span class="gfx-m">${marc}</span></div></div>`;
+    const cards = [...document.querySelectorAll(`.mt[data-id="${p.id}"]`)];
+    const card = cards.find((c) => { const r = c.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; }) || null;
+    trompeta();
+    if (card) {
+      card.classList.add("gol-reciente");
+      const ov = document.createElement("div");
+      ov.className = "gfx";
+      ov.innerHTML = cuerpo;
+      card.appendChild(ov);
+      setTimeout(() => ov.classList.add("sale"), 4300);
+      setTimeout(() => { ov.remove(); }, 4900);
+      setTimeout(() => card.classList.remove("gol-reciente"), 12000);
+    } else {
+      const t = document.createElement("div");
+      t.className = "gfx gfx-toast";
+      t.innerHTML = cuerpo;
+      document.body.appendChild(t);
+      setTimeout(() => t.classList.add("sale"), 4300);
+      setTimeout(() => t.remove(), 4900);
+    }
+  }
+  function festejar(lista) { lista.forEach((ev, i) => setTimeout(() => festejarUno(ev), i * 5200)); }
+  function demoGol() {
+    const c = document.querySelector(".mt.fin[data-id]") || document.querySelector(".mt[data-id]");
+    const p = c ? partidos().find((x) => x.id === c.dataset.id) : partidos().find(jugado);
+    if (!p) return;
+    const g = (p.goles || []).find((q) => q.j) || { e: p.local, j: "" };
+    festejar([{ id: p.id, e: g.e, j: g.j }]);
+  }
+
   /* ---------------- resultados en vivo (Google Sheets) ---------------- */
   const num = (v) => (v === "" || v == null ? null : Number(v));
+  let remotoListo = false;   // la primera lectura no festeja goles viejos
+  const golesNuevos = [];
   function aplicarRemoto(r) {
     if (!r || !r.partidos) return false;
     let cambio = false;
@@ -853,7 +936,9 @@
         penales: num(x.pl) != null && num(x.pv) != null ? { local: num(x.pl), visitante: num(x.pv) } : undefined
       };
       const antes = JSON.stringify([p.estado, p.golesLocal, p.golesVisitante, p.goles, p.tarjetas, p.veedor, p.veedorEq, p.mvp, p.penales]);
+      const prevN = (p.goles || []).length;
       Object.assign(p, nuevo);
+      if (remotoListo && nuevo.goles.length > prevN) nuevo.goles.slice(prevN).forEach((g) => golesNuevos.push({ id: p.id, e: g.e, j: g.j }));
       if (antes !== JSON.stringify([p.estado, p.golesLocal, p.golesVisitante, p.goles, p.tarjetas, p.veedor, p.veedorEq, p.mvp, p.penales])) cambio = true;
     });
     return cambio;
@@ -864,7 +949,7 @@
     try {
       const res = await fetch(D.api + (D.api.indexOf("?") >= 0 ? "&" : "?") + "accion=estado&t=" + Date.now());
       const r = await res.json();
-      if (r && r.ok && aplicarRemoto(r)) render(true);
+      if (r && r.ok) { const c = aplicarRemoto(r); remotoListo = true; if (c) render(true); if (golesNuevos.length) festejar(golesNuevos.splice(0)); }
     } catch (e) { /* sin conexión: queda lo último que se vio */ }
   }
 
@@ -904,6 +989,12 @@
     app.addEventListener("change", (ev) => {
       if (ev.target.matches("[data-eq]")) { estadoFx.eq = ev.target.value; render(true); }
       if (ev.target.matches("[data-mi]")) { try { localStorage.setItem("copaMiEq", ev.target.value); } catch (e) { /* sin storage */ } render(true); }
+    });
+    ["pointerdown", "keydown", "touchstart"].forEach((t) => document.addEventListener(t, desbloquearAudio, { once: true, passive: true }));
+    document.querySelectorAll("#snd,#snd2").forEach((b) => {
+      const pintar = () => { b.classList.toggle("off", !sonidoOn()); const s = b.querySelector("span"); if (s) s.textContent = sonidoOn() ? "Sonido de gol: sí" : "Sonido de gol: no"; };
+      pintar();
+      b.addEventListener("click", () => { try { localStorage.setItem("copaSonido", sonidoOn() ? "0" : "1"); } catch (e) { /* sin storage */ } desbloquearAudio(); pintar(); document.querySelectorAll("#snd,#snd2").forEach((x) => x.classList.toggle("off", !sonidoOn())); document.querySelectorAll("#snd span,#snd2 span").forEach((s) => { s.textContent = sonidoOn() ? "Sonido de gol: sí" : "Sonido de gol: no"; }); });
     });
     window.addEventListener("hashchange", () => render(false));
     setInterval(tickCuenta, 1000);
