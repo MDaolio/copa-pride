@@ -10,7 +10,7 @@
  *  - Para ESCRIBIR hace falta un PIN. Cada PARTIDO tiene su propio PIN: lo genera
  *    el menú "Copa Pride -> Abrir jornada de hoy" y queda anotado en la hoja "PINs".
  *    Con el PIN de un partido solo se puede cargar ESE partido.
- *  - El PIN de un partido solo vale en su horario (30 min antes hasta 90 min después)
+ *  - El PIN de un partido solo vale en su horario (10 min antes hasta 60 min después)
  *    y MUERE cuando el veedor finaliza el partido.
  *  - Hay un PIN de ADMINISTRACIÓN (fila "ADMIN" de la hoja "PINs"): entra a todos los
  *    partidos, sin horario, y puede reabrir partidos finalizados para corregirlos.
@@ -25,8 +25,8 @@ var HOJA_CONFIG = "Config";
 var HOJA_PINS = "PINs";
 var COLUMNAS = ["id", "estado", "golesLocal", "golesVisitante", "penLocal", "penVisitante",
                 "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp"];
-var MIN_ANTES = 30;           // el PIN de un partido se activa tantos minutos antes de su hora
-var MIN_DESPUES = 90;         // y vence tantos minutos después de su hora de inicio
+var MIN_ANTES = 10;           // el PIN de un partido se activa tantos minutos antes de su hora
+var MIN_DESPUES = 60;         // y vence tantos minutos después de su hora de inicio
 var MIN_PRUEBA = 240;         // duración de los PINs en una jornada de PRUEBA
 var COLS_PIN = 10;            // columnas de la hoja PINs
 var MINUTOS_BLOQUEO = 25;      // un partido tomado por un veedor queda reservado este tiempo

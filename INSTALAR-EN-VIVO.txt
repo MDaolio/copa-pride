@@ -24,8 +24,8 @@ RESULTADOS EN VIVO - PASO A PASO (se hace una sola vez, 10 minutos)
 CADA DÍA DE JORNADA
 -------------------
 - Menú "Copa Pride" > "Abrir jornada de hoy". Muestra:
-    * UN PIN POR PARTIDO (6 números). Cada uno vale solo para SU partido, desde 30 minutos antes
-      de la hora hasta 90 minutos después, y SE ANULA cuando el veedor finaliza el partido.
+    * UN PIN POR PARTIDO (6 números). Cada uno vale solo para SU partido, desde 10 minutos antes
+      de la hora hasta 60 minutos después, y SE ANULA cuando el veedor finaliza el partido.
     * UN PIN DE ADMINISTRACIÓN (solo para la organización): entra a todos los partidos, sin horario,
       y puede reabrir partidos finalizados para corregirlos.
   Todo queda anotado en la hoja "PINs" (hora, cancha, encuentro, PIN, veedor, horario y estado).
