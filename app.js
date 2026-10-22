@@ -718,7 +718,6 @@
     const sec = Object.fromEntries(S.map(([k, t]) => { const r = estSeccion(k); return [k, `<section class="est-sec" id="est-${k}"><h3 class="titulo-sec">${t}</h3><div class="est-cuerpo">${r.cuerpo}<p class="leyenda">${r.nota}</p></div></section>`]; }));
     const ir = S.map(([k, t]) => `<button class="chip" data-ir="est-${k}">${t}</button>`).join("");
     return `<p class="kicker">Los números de la Copa</p><h2 class="titulo-pag">Estadísticas</h2>
-      <div class="filtros est-tabs">${ir}</div>
       ${sec.goleadores}
       <div class="est-duo">${sec.valla}${sec.fairplay}</div>
       <div class="est-duo">${sec.suspendidos}${sec.veedores}</div>`;
