@@ -44,7 +44,7 @@ h1,h2,h3,h4{font-family:var(--display);font-weight:400;text-transform:uppercase;
 /* ---------- Estructura: riel lateral negro + hoja ---------- */
 .shell{display:grid;grid-template-columns:var(--riel) minmax(0,1fr);min-height:100vh}
 .rail{position:sticky;top:0;height:100vh;background:#0a0a0a;color:#f1ede1;display:flex;flex-direction:column;gap:1.4rem;padding:1.4rem 0 1.2rem;overflow-y:auto}
-.rail::after{content:"";position:absolute;top:0;right:0;bottom:0;width:6px;background:var(--orgullo-v)}
+.rail::after{content:"";position:absolute;top:0;right:0;bottom:0;width:3px;background:var(--orgullo-v)}
 .logo{display:block;padding:0 1.4rem}
 .logo-img{display:block;width:100%;max-width:150px;height:auto}
 .logo-s{display:block;margin-top:.55rem;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#a8a398}
