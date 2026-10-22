@@ -52,7 +52,7 @@ window.LIGA_DATA = {
     { id: "e6", nombre: "Crisol", zona: "A", escudo: "img/escudos/crisol.png", colores: ["#e8590c", "#4a1a0a"] },
     { id: "e7", nombre: "Escorpiones", zona: "A", escudo: "img/escudos/escorpiones.png", colores: ["#e0141a", "#1a0405"] },
     // Zona B
-    { id: "e5", nombre: "DOGOS F5", zona: "B", escudo: "img/escudos/e2.png", cabeza: 2, colores: ["#4fb3ff", "#0f3a7a"] },
+    { id: "e5", nombre: "Dogos F5", zona: "B", escudo: "img/escudos/e2.png", cabeza: 2, colores: ["#4fb3ff", "#0f3a7a"] },
     { id: "e3", nombre: "FGR", zona: "B", escudo: "img/escudos/e1.png", colores: ["#e86aa5", "#3a86ff"] },
     { id: "e12", nombre: "Grindr", zona: "B", escudo: "img/escudos/grindr.png", colores: ["#ff4d4d", "#ffb000", "#34c759", "#2d9cff", "#9b59f6"] },
     { id: "e14", nombre: "Fenix", zona: "B", escudo: "img/escudos/fenix.png", colores: ["#ff7a00", "#111111"] },
@@ -586,7 +586,7 @@ window.LIGA_DATA = {
 
   historial: [
     { edicion: "Copa Pride segunda edición", anio: "2025",
-      oro:   { campeon: "DOGOS F5", subcampeon: "Aguará Guazú" },
+      oro:   { campeon: "Dogos F5", subcampeon: "Aguará Guazú" },
       plata: { campeon: "Impulse", subcampeon: "Stitch" },
       goleador: "Hugo Ayala", goleadorEquipo: "Yacares BA", notas: "" },
     { edicion: "Copa Pride primera edición", anio: "2024",

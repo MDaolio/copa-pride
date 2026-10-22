@@ -184,7 +184,7 @@
 
   window.MASCOTAS_COPA = {
     e1: { corre: AGUARA_CORRE, sienta: AGUARA_SIENTA, brisa: "#ffe2b8" },   // Aguará Guazú
-    e5: { corre: DOGO_CORRE, sienta: DOGO_SIENTA, brisa: "#cfe9ff" },       // DOGOS F5
+    e5: { corre: DOGO_CORRE, sienta: DOGO_SIENTA, brisa: "#cfe9ff" },       // Dogos F5
     e11: { corre: HUEMUL_CORRE, sienta: HUEMUL_SIENTA, brisa: "#f1e3c6" }   // Huemules
   };
 })();
