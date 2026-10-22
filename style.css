@@ -764,3 +764,6 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 /* Jugadores del plantel */
 .tarjeta{border-left:4px solid var(--oro-osc)}
 .tarjeta:hover{transform:none;box-shadow:none;background:var(--hoja-2);border-left-color:var(--oro-t)}
+
+/* Copa Plata: la misma llave pero en plateado (letras, filos, campeón y botón elegido) */
+.tono-plata{--oro:#aeb3bb;--oro-t:#dde1e6;--oro-osc:#6f747c;--oro-claro:#dde1e6;--oro-grad:linear-gradient(135deg,#f1f3f5 0%,#bcc1c8 52%,#858a92 100%)}

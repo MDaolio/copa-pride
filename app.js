@@ -628,8 +628,9 @@
     const cols = copa.rondas.map((r) => `<div class="rcol"><h3>${esc(r.nombre)}</h3><div class="rcruces">${r.cruces.map(cruceHtml).join("")}</div></div>`).join("");
     const e = campeonDe(copa);
     const camp = `<div class="rcol"><h3>Campeón</h3><div class="rcruces"><div class="campeon ${e ? "" : "tbd"}"><span class="copa-ico">🏆</span>${e ? badge(e, "grande") : ""}<h3>${e ? esc(e.nombre) : "Por definirse"}</h3><span class="kicker">${esc(copa.copa)}</span></div></div></div>`;
-    return `<p class="kicker">Eliminatorias</p><h2 class="titulo-pag">Copas</h2>
-      <div class="filtros">${tabs}</div><div class="bracket">${cols}${camp}</div>`;
+    const plata = /plata/i.test(copa.copa || "") ? " tono-plata" : "";
+    return `<div class="copas-v${plata}"><p class="kicker">Eliminatorias</p><h2 class="titulo-pag">Copas</h2>
+      <div class="filtros">${tabs}</div><div class="bracket">${cols}${camp}</div></div>`;
   }
 
   function vistaEquipos() {
