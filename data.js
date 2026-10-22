@@ -307,7 +307,7 @@ window.LIGA_DATA = {
         { j: "p323", e: "e4", t: "A" }
       ] },
 
-    { id: "m4", fase: "Zona", manual: true, veedorEq: "e4", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 1",
+    { id: "m4", fase: "Zona", manual: true, veedorEq: "e4", mvp: "p210", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 1",
       local: "e5", visitante: "e14", golesLocal: 5, golesVisitante: 5,
       goles: [
         { j: "p22", e: "e5" },
@@ -347,7 +347,7 @@ window.LIGA_DATA = {
         { j: "p302", e: "e3", t: "A" }
       ] },
 
-    { id: "m6", fase: "Zona", manual: true, veedorEq: "e9", zona: "A", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 3",
+    { id: "m6", fase: "Zona", manual: true, veedorEq: "e9", mvp: "p112", zona: "A", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 3",
       local: "e2", visitante: "e6", golesLocal: 1, golesVisitante: 6,
       goles: [
         { j: "p9", e: "e2" },
