@@ -319,7 +319,7 @@
         items.push({ tipo: "t", ico: iconoTarj(x), nom: j ? j.nombre : "?" });
       });
       return items.map((i) => i.tipo === "g"
-        ? `<li><span class="ic">⚽</span><span class="nm">${esc(i.nom)}${i.min ? ` <small>${esc(i.min)}'</small>` : ""}</span>${i.n > 1 ? `<b class="x">×${i.n}</b>` : ""}</li>`
+        ? `<li><span class="ic">⚽</span><span class="nm">${esc(i.nom)}${i.min ? ` <small>${esc(i.min)}'</small>` : ""}</span><span class="pal-s">${palitos(i.n)}</span></li>`
         : `<li><span class="ic">${i.ico}</span><span class="nm">${esc(i.nom)}</span></li>`).join("");
     };
     const l = lado(p.local), v = lado(p.visitante);
@@ -381,8 +381,11 @@
     let pie = "";
     if (o.veedor && p.veedor) pie += `<p class="veedor">Veedor: ${veedorTxt(p.veedor, p.veedorEq)}</p>`;
     if (o.detalle && (ok || live)) {
-      const { am, ro, az } = contarTarj(p.tarjetas);
-      pie += `<details${live ? " open" : ""}><summary><span>⚽ ${p.golesLocal + p.golesVisitante}</span><span>🟨 ${am}</span>${ro ? `<span>🟥 ${ro}</span>` : ""}${az ? `<span>🟦 ${az}</span>` : ""}<span class="chev">▾</span></summary>${detalle(p)}</details>`;
+      const res = (id, gol) => {
+        const { am, ro, az } = contarTarj((p.tarjetas || []).filter((x) => x.e === id));
+        return `<span class="sm"><span>⚽ ${gol}</span>${am ? `<span>🟨 ${am}</span>` : ""}${ro ? `<span>🟥 ${ro}</span>` : ""}${az ? `<span>🟦 ${az}</span>` : ""}</span>`;
+      };
+      pie += `<details${live ? " open" : ""}><summary>${res(p.local, p.golesLocal).replace('class="sm"', 'class="sm sm-l"')}<span class="chev">▾</span>${res(p.visitante, p.golesVisitante).replace('class="sm"', 'class="sm sm-v"')}</summary>${detalle(p)}</details>`;
     }
     return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
   }

@@ -166,7 +166,15 @@ img.badge{object-fit:contain;border-radius:0;background:transparent}
 .v-eq{color:var(--oro-t)}
 .mt-pie details summary{cursor:pointer;display:flex;gap:.9rem;align-items:center;font-family:var(--mono);font-size:.76rem;font-weight:700;list-style:none;padding:.2rem 0}
 .mt-pie details summary::-webkit-details-marker{display:none}
-.mt-pie details .chev{margin-left:auto;transition:transform .15s}
+.mt-pie details .chev{transition:transform .15s;color:var(--tinta-2)}
+.mt-pie details summary{justify-content:space-between}
+.mt-pie .sm{display:flex;gap:.8rem;min-width:0;flex:1}
+.mt-pie .sm-v{justify-content:flex-end}
+.pal-s .pal{max-width:none;color:var(--oro-t)}
+.pal-s s{height:.95rem;width:2px}
+.pal-s .g,.pal-s .g5{gap:2px}
+.pal-s .pal{gap:.1rem .4rem}
+.det-v .pal{flex-direction:row}
 .mt-pie details[open] .chev{transform:rotate(180deg)}
 .det{display:flex;flex-direction:column;gap:.15rem;padding:.4rem 0 .2rem;font-size:.86rem}
 .det small{color:var(--tinta-2);font-family:var(--mono);font-size:.68rem}
