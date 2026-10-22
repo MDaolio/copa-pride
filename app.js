@@ -685,6 +685,7 @@
     partidos().forEach((p) => {
       const x = r.partidos[p.id];
       if (!x || !x.estado) return;
+      if (p.manual) return;   // resultado cargado a mano en data.js: la planilla en vivo no lo pisa
       const nuevo = {
         estado: x.estado, golesLocal: num(x.gl), golesVisitante: num(x.gv),
         goles: x.goles || [], tarjetas: x.tarjetas || [], veedor: x.veedor || p.veedor, veedorEq: x.veedorEq || p.veedorEq,

@@ -258,6 +258,7 @@ window.LIGA_DATA = {
   //   "G:OC1"      = ganador del cruce OC1 (ver llaves más abajo)
   //   "P:OS1"      = perdedor del cruce OS1 (para el 3er puesto)
   // Si hay empate en playoffs: penales: { local: 4, visitante: 3 }
+  // manual: true  = resultado cargado acá a mano: los datos en vivo de la planilla no lo pisan.
   // Walkover (resultado de mesa, ej. 3-0): agregar  wo: true  al partido. No cuenta en PJ ni en GR de la valla.
   // Equipo que abandona el torneo: agregar  abandono: true  al equipo. No figura en el ranking de valla.
   // Arquero titular (el que más partidos ataja): agregar  arquero: true  al jugador. Es quien figura en la valla menos vencida.
@@ -265,7 +266,7 @@ window.LIGA_DATA = {
   partidos: [
 
     // ----- Fecha 1 (sorteo del 15/10) -----
-    { id: "m1", fase: "Zona", zona: "C", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 1",
+    { id: "m1", fase: "Zona", manual: true, zona: "C", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 1",
       local: "e9", visitante: "e8", golesLocal: 4, golesVisitante: 2,
       goles: [
         { j: "p43", e: "e9" },
@@ -277,7 +278,7 @@ window.LIGA_DATA = {
       ],
       tarjetas: [] },
 
-    { id: "m2", fase: "Zona", zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 2",
+    { id: "m2", fase: "Zona", manual: true, zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 2",
       local: "e13", visitante: "e16", golesLocal: 7, golesVisitante: 1,
       goles: [
         { j: "p64", e: "e13" },
@@ -293,7 +294,7 @@ window.LIGA_DATA = {
         { j: "p150", e: "e16", t: "A" }
       ] },
 
-    { id: "m3", fase: "Zona", zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 3",
+    { id: "m3", fase: "Zona", manual: true, zona: "D", fecha: "2026-10-17", hora: "14:00", cancha: "Cancha 3",
       local: "e4", visitante: "e15", golesLocal: 2, golesVisitante: 2,
       goles: [
         { j: "p327", e: "e4" },
@@ -305,7 +306,7 @@ window.LIGA_DATA = {
         { j: "p323", e: "e4", t: "A" }
       ] },
 
-    { id: "m4", fase: "Zona", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 1",
+    { id: "m4", fase: "Zona", manual: true, zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 1",
       local: "e5", visitante: "e14", golesLocal: 5, golesVisitante: 5,
       goles: [
         { j: "p22", e: "e5" },
@@ -326,7 +327,7 @@ window.LIGA_DATA = {
         { j: "p70", e: "e14", t: "A" }
       ] },
 
-    { id: "m5", fase: "Zona", zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 2",
+    { id: "m5", fase: "Zona", manual: true, zona: "B", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 2",
       local: "e3", visitante: "e12", golesLocal: 3, golesVisitante: 7,
       goles: [
         { j: "p306", e: "e3" },
@@ -345,7 +346,7 @@ window.LIGA_DATA = {
         { j: "p302", e: "e3", t: "A" }
       ] },
 
-    { id: "m6", fase: "Zona", zona: "A", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 3",
+    { id: "m6", fase: "Zona", manual: true, zona: "A", fecha: "2026-10-17", hora: "15:00", cancha: "Cancha 3",
       local: "e2", visitante: "e6", golesLocal: 1, golesVisitante: 6,
       goles: [
         { j: "p9", e: "e2" },
@@ -360,7 +361,7 @@ window.LIGA_DATA = {
         { j: "p120", e: "e2", t: "A" }
       ] },
 
-    { id: "m7", fase: "Zona", zona: "C", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 1",
+    { id: "m7", fase: "Zona", manual: true, zona: "C", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 1",
       local: "e10", visitante: "e11", golesLocal: 0, golesVisitante: 2,
       goles: [
         { j: "p55", e: "e11" },
@@ -368,7 +369,7 @@ window.LIGA_DATA = {
       ],
       tarjetas: [] },
 
-    { id: "m8", fase: "Zona", zona: "A", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 3",
+    { id: "m8", fase: "Zona", manual: true, zona: "A", fecha: "2026-10-17", hora: "16:00", cancha: "Cancha 3",
       local: "e1", visitante: "e7", golesLocal: 18, golesVisitante: 1,
       goles: [
         { j: "p5", e: "e1" },
