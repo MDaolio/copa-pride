@@ -1,6 +1,15 @@
 # Quiénes jugaron en la Fecha 1 (leído de las planillas; donde el veedor no marcó JUGÓ se dedujo por goles/tarjetas).
 # Ajustes a mano (la planilla escribe el apellido distinto que la lista de buena fe)
-A_MANO = {"e15": ["p84"], "e12": ["p56"], "e3": ["p312"]}
+A_MANO = {"e15": ["p84"], "e12": ["p56"], "e3": ["p312"],
+  # Completado por Fer (22/10): jugadores que jugaron la Fecha 1 y no estaban marcados
+  "e1":  ["p115", "p4"],                                              # Demian Mareco, Alejandro del Fallo
+  "e6":  ["p26", "p27"],                                              # Julio Cesar Ebel, Federico Belluscio
+  "e2":  ["p6", "p7", "p8", "p10", "p116", "p117", "p118", "p119"],   # todos menos Rodrigo Juan y Nicolas Samaniego (agregado)
+  "e7":  ["p33", "p34", "p122"],                                      # los 6 de Escorpiones
+  "e10": ["p47", "p104", "p101", "p102", "p105"],                     # Nano, Alexander, Erik, Nicolás Quiroga, Leonel
+  "e11": ["p51", "p108"],                                             # los 7 de Huemules
+  "e14": ["p212"],                                                    # Nicolas Sequeira
+}
 
 JUGARON = {
  "e9":  ["Josias Sotelo","Mariano Royano","Marcelo Romanowicz","Ruben González","Gaston Rios","Cesar Guzman","Alex Llamocca"],
