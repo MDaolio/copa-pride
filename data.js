@@ -99,7 +99,6 @@ window.LIGA_DATA = {
     { id: "p327", nombre: "Diego Ozuna", equipo: "e4", foto: "" },
     { id: "p328", nombre: "Alberto Ozuna", equipo: "e4", foto: "" },
     { id: "p329", nombre: "Oscar Maza", equipo: "e4", foto: "" },
-    { id: "p330", nombre: "Manuel Dure", equipo: "e4", foto: "" },
     { id: "p331", nombre: "Samuel Suarez", equipo: "e4", foto: "" },
     { id: "p332", nombre: "Gonzalo Alvarau", equipo: "e4", foto: "" },
     { id: "p2", nombre: "Juan Pablo Duarte", equipo: "e1", foto: "" },
