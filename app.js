@@ -622,7 +622,7 @@
       const link = s.eq ? `href="#/equipo/${esc(s.eq.id)}"` : "";
       return `<a class="fe ${cls}" ${link}>${slotHtml(s)}<span class="gl">${g == null ? "" : esc(g)}${pen != null ? `<i>(${esc(pen)})</i>` : ""}</span></a>`;
     };
-    return `<article class="celda cruce">
+    return `<article class="celda cruce" data-cruce="${esc(c.id)}">
       <div class="res-top"><span>${esc(c.nombre || "")}</span>${ok ? '<span class="tag">FINAL</span>' : ""}</div>
       ${fila(rc.local, ok ? p.golesLocal : null, pe.local, p ? p.local : null)}
       ${fila(rc.visitante, ok ? p.golesVisitante : null, pe.visitante, p ? p.visitante : null)}
@@ -640,8 +640,50 @@
     const camp = `<div class="rcol"><h3>Campeón</h3><div class="rcruces"><div class="campeon ${e ? "" : "tbd"}"><span class="copa-ico">🏆</span>${e ? badge(e, "grande") : ""}<h3>${e ? esc(e.nombre) : "Por definirse"}</h3><span class="kicker">${esc(copa.copa)}</span></div></div></div>`;
     const plata = /plata/i.test(copa.copa || "") ? " tono-plata" : "";
     return `<div class="copas-v${plata}"><p class="kicker">Eliminatorias</p><h2 class="titulo-pag">Copas</h2>
-      <div class="filtros">${tabs}</div><div class="bracket">${cols}${camp}</div>${asiQuedaria(copa)}</div>`;
+      <div class="filtros">${tabs}</div><div class="bracket" data-llave="${i}">${cols}${camp}</div>${asiQuedaria(copa)}</div>`;
   }
+
+  /* Líneas que unen cada cruce con el que lo recibe (cuartos -> semi -> final -> campeón).
+     Se calculan con la posición real de las tarjetas, así siguen bien en compu y en celu. */
+  function dibujarConectores() {
+    const br = document.querySelector(".bracket[data-llave]");
+    if (!br) return;
+    const copa = llaves()[Number(br.dataset.llave)];
+    if (!copa) return;
+    br.querySelectorAll("svg.conect").forEach((s) => s.remove());
+    const base = br.getBoundingClientRect(), sl = br.scrollLeft, st = br.scrollTop;
+    const caja = (el) => { const r = el.getBoundingClientRect(); return { x1: r.left - base.left + sl, x2: r.right - base.left + sl, y: r.top - base.top + st + r.height / 2 }; };
+    const pares = [];
+    copa.rondas.forEach((r) => r.cruces.forEach((c) => {
+      const p = c.partidoId ? partidos().find((x) => x.id === c.partidoId) : null;
+      if (!p) return;
+      [p.slotL != null ? p.slotL : p.local, p.slotV != null ? p.slotV : p.visitante].forEach((s) => {
+        const m = /^G:(.+)$/.exec(s || "");
+        if (m) pares.push([m[1], c.id]);
+      });
+    }));
+    const ult = copa.rondas[copa.rondas.length - 1], fin = ult && ult.cruces[0];
+    let d = "";
+    const unir = (A, B) => {
+      const mx = A.x2 + (B.x1 - A.x2) / 2;
+      d += `M${A.x2.toFixed(1)} ${A.y.toFixed(1)}H${mx.toFixed(1)}V${B.y.toFixed(1)}H${B.x1.toFixed(1)}`;
+    };
+    pares.forEach(([de, a]) => {
+      const A = br.querySelector(`[data-cruce="${de}"]`), B = br.querySelector(`[data-cruce="${a}"]`);
+      if (A && B) unir(caja(A), caja(B));
+    });
+    const campEl = br.querySelector(".campeon"), finEl = fin ? br.querySelector(`[data-cruce="${fin.id}"]`) : null;
+    if (campEl && finEl) unir(caja(finEl), caja(campEl));
+    if (!d) return;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "conect");
+    svg.setAttribute("width", br.scrollWidth); svg.setAttribute("height", br.scrollHeight);
+    svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = `<path d="${d}"/>`;
+    br.prepend(svg);
+  }
+  let tConect = 0;
+  window.addEventListener("resize", () => { clearTimeout(tConect); tConect = setTimeout(dibujarConectores, 120); });
 
   /* "Así quedaría hoy": los cuartos armados con las posiciones actuales (mientras no terminen las zonas). */
   function asiQuedaria(copa) {
@@ -907,6 +949,7 @@
       default: html = vistaInicio();
     }
     document.getElementById("app").innerHTML = html;
+    if (pagina === "copas") { requestAnimationFrame(dibujarConectores); setTimeout(dibujarConectores, 400); }
     const tk = document.getElementById("ticker");
     if (tk) { const h = cintaHtml(); if (tk._h !== h) { tk._h = h; tk.innerHTML = h; } tk.hidden = !h; }
     tickCuenta();

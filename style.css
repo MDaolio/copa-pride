@@ -785,3 +785,10 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 .aq-n.tbd{grid-column:1 / -1;color:var(--tinta-2);font-weight:500}
 .aq-z{grid-column:3;font-size:.74rem;color:var(--tinta-2)}
 .aq-vs{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-2);text-align:center;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.1rem 0}
+
+/* Copas: líneas conectoras del cuadro */
+.bracket{position:relative}
+.bracket>svg.conect{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0}
+.bracket>svg.conect path{fill:none;stroke:var(--oro);stroke-width:2;stroke-linejoin:round;opacity:.85}
+.bracket .rcol{position:relative;z-index:1}
+.cruce::after,.campeon::after{display:none!important}
