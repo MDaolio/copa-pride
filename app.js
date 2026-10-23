@@ -626,7 +626,7 @@
       <div class="res-top"><span>${esc(c.nombre || "")}</span>${ok ? '<span class="tag">FINAL</span>' : ""}</div>
       ${fila(rc.local, ok ? p.golesLocal : null, pe.local, p ? p.local : null)}
       ${fila(rc.visitante, ok ? p.golesVisitante : null, pe.visitante, p ? p.visitante : null)}
-      ${p ? `<p class="veedor">${esc(fechaCorta(p.fecha))} · ${esc(p.hora)} · ${esc(p.cancha)}</p>` : ""}
+      ${p ? `<p class="veedor">${p.fecha ? [fechaCorta(p.fecha), p.hora, p.cancha].filter(Boolean).map(esc).join(" · ") : "— A definir"}</p>` : ""}
     </article>`;
   }
 
