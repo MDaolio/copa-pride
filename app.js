@@ -635,7 +635,16 @@
     if (!ll.length) return vacio("Las llaves se publican cuando termine la fase de zonas.");
     const i = Math.min(estadoCopa.i, ll.length - 1), copa = ll[i];
     const tabs = ll.map((c, k) => `<button class="chip ${k === i ? "on" : ""}" data-copa="${k}">${esc(c.copa)}</button>`).join("");
-    const cols = copa.rondas.map((r) => `<div class="rcol"><h3>${esc(r.nombre)}</h3><div class="rcruces">${r.cruces.map(cruceHtml).join("")}</div></div>`).join("");
+    const nR = copa.rondas.length;
+    const cols = copa.rondas.map((r, k) => {
+      if (k === nR - 1 && r.cruces.length > 1) {
+        // Última ronda: la final en el centro (donde se juntan las semis) y el 3er puesto abajo, más chico.
+        const [fin, ...resto] = r.cruces;
+        return `<div class="rcol r-ult"><h3>${esc(r.nombre)}</h3><div class="rcruces"><div class="r-fin">${cruceHtml(fin)}</div>
+          <div class="r-3ro"><p class="r-3ro-t">Partido por el 3er puesto</p>${resto.map(cruceHtml).join("")}</div></div></div>`;
+      }
+      return `<div class="rcol${k === nR - 2 ? " r-semi" : ""}"><h3>${esc(r.nombre)}</h3><div class="rcruces">${r.cruces.map(cruceHtml).join("")}</div></div>`;
+    }).join("");
     const e = campeonDe(copa);
     const camp = `<div class="rcol"><h3>Campeón</h3><div class="rcruces"><div class="campeon ${e ? "" : "tbd"}"><span class="copa-ico">🏆</span>${e ? badge(e, "grande") : ""}<h3>${e ? esc(e.nombre) : "Por definirse"}</h3><span class="kicker">${esc(copa.copa)}</span></div></div></div>`;
     const plata = /plata/i.test(copa.copa || "") ? " tono-plata" : "";

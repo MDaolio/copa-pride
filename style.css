@@ -792,3 +792,16 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 .bracket>svg.conect path{fill:none;stroke:var(--oro);stroke-width:2;stroke-linejoin:round;opacity:.85}
 .bracket .rcol{position:relative;z-index:1}
 .cruce::after,.campeon::after{display:none!important}
+
+/* Copas: semis hacia el centro, final en el medio y 3er puesto abajo y relegado */
+.rcol.r-semi .rcruces{display:grid;grid-template-rows:1.5fr auto 1fr auto 1.5fr;gap:0}
+.rcol.r-semi .rcruces>:nth-child(1){grid-row:2}
+.rcol.r-semi .rcruces>:nth-child(2){grid-row:4}
+.rcol.r-ult .rcruces{display:grid;grid-template-rows:1fr auto 1fr;gap:0}
+.r-fin{grid-row:2}
+.r-3ro{grid-row:3;align-self:end;display:grid;gap:.35rem;opacity:.72;transform:scale(.9);transform-origin:left bottom}
+.r-3ro-t{margin:0;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-2)}
+.r-3ro .celda.cruce{border-left-color:var(--borde)!important;background:var(--negro-2)}
+.r-3ro .res-top span{color:var(--tinta-2)}
+.rcol.r-semi .rcruces,.rcol.r-ult .rcruces{grid-template-columns:minmax(0,1fr);width:100%}
+.rcol.r-semi .rcruces>*,.r-fin,.r-fin>*{width:100%;justify-self:stretch;box-sizing:border-box}
