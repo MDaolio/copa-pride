@@ -822,3 +822,9 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 @keyframes mcTrote{0%,100%{transform:translateY(0) rotate(-2deg)}25%{transform:translateY(-7%) rotate(2deg) scale(1.02,.98)}50%{transform:translateY(0) rotate(-1deg) scale(.98,1.02)}75%{transform:translateY(-5%) rotate(3deg)}}
 @keyframes mcRespiraImg{0%,100%{transform:none}30%{transform:scale(1.025,.985) rotate(-1.2deg)}60%{transform:scale(.99,1.012) rotate(1deg)}}
 @media (max-width:560px){.masc-img .mc-carrera{height:60%}.masc-img .mc-sentado{height:64%}}
+
+/* Festejo con la foto del jugador que hizo el gol */
+.gfx-esc.con-foto{position:relative}
+.gfx-foto{display:block;width:112px;height:112px;object-fit:cover;border-radius:50%;border:3px solid #fff;box-shadow:0 10px 22px rgba(0,0,0,.55)}
+.gfx-esc.con-foto .badge{position:absolute;right:-6px;bottom:-4px;width:40px;height:40px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+@media (max-width:560px){.gfx-foto{width:80px;height:80px}.gfx-esc.con-foto .badge{width:30px;height:30px}}

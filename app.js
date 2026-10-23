@@ -1043,7 +1043,9 @@
   /* Mascotas del festejo (dibujos en mascotas.js): entra corriendo con estela de viento,
      pasa por detrás del escudo y se sienta a la derecha mirando de frente. */
   const MASCOTAS = window.MASCOTAS_COPA || {};
+  // Mascotas en stand-by: por ahora el festejo muestra la foto del jugador que hizo el gol. Para volver a usarlas, poné D.mascotas: true en data.js.
   function mascotaHtml(e) {
+    if (!D.mascotas) return "";
     const m = e && MASCOTAS[e.id];
     if (!m) return "";
     let polvo = "";
@@ -1066,7 +1068,7 @@
     if (!p || !e) return;
     const marc = `${esc((equipo(p.local) || {}).nombre || "")} <b>${esc(p.golesLocal)}</b> – <b>${esc(p.golesVisitante)}</b> ${esc((equipo(p.visitante) || {}).nombre || "")}`;
     const cuerpo = `<div class="gfx-conf">${confetiHtml()}</div>${mascotaHtml(e)}
-      <div class="gfx-in"><div class="gfx-esc">${badge(e, "grande")}</div>
+      <div class="gfx-in"><div class="gfx-esc${j && j.foto ? " con-foto" : ""}">${j && j.foto ? `<img class="gfx-foto" src="${esc(j.foto)}" alt="${esc(j.nombre)}">${badge(e, "chico")}` : badge(e, "grande")}</div>
         <div class="gfx-t"><strong>¡GOOOL!</strong><span class="gfx-eq">de ${esc(e.nombre)}</span>${j ? `<span class="gfx-j">${esc(j.nombre)}</span>` : ""}<span class="gfx-m">${marc}</span></div></div>`;
     const cs = (e.colores && e.colores.length ? e.colores : ["#e6bd5e", "#6b4a0c"]);
     const fondo = `radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.38),rgba(0,0,0,0) 72%),linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 38%),linear-gradient(120deg,${cs.join(",")})`;
@@ -1103,14 +1105,14 @@
     // Simulación: un gol en el primer resultado y, después, uno en el de al lado.
     // Primero los partidos de equipos con mascota (para mostrar los dibujos); si no hay, los dos primeros.
     const todas = [...document.querySelectorAll(".mt.fin[data-id]")];
-    const tieneMasc = (c) => { const p = partidos().find((x) => x.id === c.dataset.id); return p && (MASCOTAS[p.local] || MASCOTAS[p.visitante]); };
+    const tieneMasc = (c) => { const p = partidos().find((x) => x.id === c.dataset.id); return p && D.mascotas && (MASCOTAS[p.local] || MASCOTAS[p.visitante]); };
     const vistos = new Set();
     const conMascota = todas.filter(tieneMasc);
     const cards = (conMascota.length ? conMascota : todas).filter((c) => !vistos.has(c.dataset.id) && vistos.add(c.dataset.id)).slice(0, conMascota.length ? 4 : 2);
     const lista = cards.map((c) => {
       const p = partidos().find((x) => x.id === c.dataset.id);
       // Si juega un equipo con mascota, el gol de la demo es de ese equipo, así se ve el dibujo.
-      const conMasc = p && [p.local, p.visitante].find((id) => MASCOTAS[id]);
+      const conMasc = p && D.mascotas && [p.local, p.visitante].find((id) => MASCOTAS[id]);
       const g = ((p && p.goles) || []).find((q) => q.j && (!conMasc || q.e === conMasc)) || { e: conMasc || (p && p.local), j: "" };
       return { id: c.dataset.id, e: g.e, j: g.j };
     });
