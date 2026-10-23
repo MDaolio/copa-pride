@@ -228,6 +228,7 @@ window.LIGA_DATA = {
     { id: "p137", nombre: "Juan Manuel Gaitan", equipo: "e12", foto: "" },
     { id: "p138", nombre: "Aldo Tolosa", equipo: "e12", foto: "" },
     { id: "p139", nombre: "Mariano Ledesma", equipo: "e12", foto: "" },
+    { id: "p342", nombre: "Alejo Manuel Marcos", equipo: "e12", foto: "", agregado: "2026-10-23" },   // agregado ya empezada la Copa (cupo 1 de 2)
     { id: "p140", nombre: "Juan Manuel Menéndez", equipo: "e13", foto: "" },
     { id: "p141", nombre: "Marcos Telleldin", equipo: "e13", foto: "" },
     { id: "p142", nombre: "Francisco Alberio", equipo: "e13", foto: "" },
