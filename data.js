@@ -402,7 +402,6 @@ window.LIGA_DATA = {
     // ----- Fecha 2 (sorteo del 15/10) -----
     { id: "m9", fase: "Zona", zona: "A", fecha: "2026-10-24", hora: "14:00", cancha: "Cancha 1",
       local: "e1", visitante: "e6", golesLocal: null, golesVisitante: null,
-      veedorEq: "e16",
       goles: [], tarjetas: [] },
 
     { id: "m10", fase: "Zona", zona: "A", fecha: "2026-10-24", hora: "14:00", cancha: "Cancha 2",
@@ -411,31 +410,32 @@ window.LIGA_DATA = {
 
     { id: "m11", fase: "Zona", zona: "B", fecha: "2026-10-24", hora: "14:00", cancha: "Cancha 3",
       local: "e5", visitante: "e12", golesLocal: null, golesVisitante: null,
+      veedor: "Sid", veedorEq: "e16",
       goles: [], tarjetas: [] },
 
     { id: "m12", fase: "Zona", zona: "D", fecha: "2026-10-24", hora: "15:00", cancha: "Cancha 1",
       local: "e13", visitante: "e15", golesLocal: null, golesVisitante: null,
-      veedorEq: "e5",
+      veedor: "David", veedorEq: "e5",
       goles: [], tarjetas: [] },
 
     { id: "m13", fase: "Zona", zona: "C", fecha: "2026-10-24", hora: "15:00", cancha: "Cancha 2",
       local: "e10", visitante: "e8", golesLocal: null, golesVisitante: null,
-      veedorEq: "e6",
+      veedor: "Julio", veedorEq: "e6",
       goles: [], tarjetas: [] },
 
     { id: "m14", fase: "Zona", zona: "C", fecha: "2026-10-24", hora: "15:00", cancha: "Cancha 3",
       local: "e9", visitante: "e11", golesLocal: null, golesVisitante: null,
-      veedorEq: "e7",
+      veedor: "Trilles / Ari", veedorEq: "e7",
       goles: [], tarjetas: [] },
 
     { id: "m15", fase: "Zona", zona: "D", fecha: "2026-10-24", hora: "16:00", cancha: "Cancha 1",
       local: "e4", visitante: "e16", golesLocal: null, golesVisitante: null,
-      veedorEq: "e2",
+      veedor: "Madi", veedorEq: "e2",
       goles: [], tarjetas: [] },
 
     { id: "m16", fase: "Zona", zona: "B", fecha: "2026-10-24", hora: "16:00", cancha: "Cancha 3",
       local: "e3", visitante: "e14", golesLocal: null, golesVisitante: null,
-      veedorEq: "e11",
+      veedor: "Juanpy / Matute", veedorEq: "e11",
       goles: [], tarjetas: [] },
 
     // ----- Fecha 3 (sorteo del 15/10) -----

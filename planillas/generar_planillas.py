@@ -106,6 +106,9 @@ def hoja(c, p):
     c.drawRightString(W - M, H - 14.5 * mm, f"{zona}{fecha} · {dia} · {p['hora']} hs · {p['cancha']}")
     c.setFont("Helvetica-Bold", 10); c.drawRightString(W - M - 62 * mm, H - 20.5 * mm, "Veedor/a:")
     c.setStrokeColor(black); c.setLineWidth(0.7); c.line(W - M - 60 * mm, H - 21 * mm, W - M, H - 21 * mm)
+    vn = p.get("veedor") or ""; ve = nombre_equipo(p["veedorEq"]) if p.get("veedorEq") else ""
+    if vn or ve:
+        c.setFont("Helvetica", 10); c.drawString(W - M - 59 * mm, H - 20.2 * mm, (vn + (f" ({ve})" if ve else "")).strip())
     # tablas
     gap = 6 * mm; ancho = (W - 2 * M - gap) / 2
     ytop = H - 24 * mm - 3 * mm
