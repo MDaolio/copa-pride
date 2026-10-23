@@ -1054,7 +1054,7 @@
     }
     let brillos = "";
     for (let i = 0; i < 6; i++) brillos += `<i style="--a:${i * 60 + Math.round(Math.random() * 20)}deg;animation-delay:${(1.5 + i * 0.04).toFixed(2)}s">${i % 2 ? "✦" : "♥"}</i>`;
-    return `<div class="gfx-masc" style="--brisa:${m.brisa || "#fff"}">
+    return `<div class="gfx-masc${m.img ? " masc-img" : ""}" style="--brisa:${m.brisa || "#fff"}">
       <div class="mc-polvo">${polvo}</div>
       <div class="mc-carrera"><div class="mc-brisa"><i></i><i></i><i></i><i></i><i></i></div><div class="mc-corre">${m.corre}</div></div>
       <div class="mc-sentado"><div class="mc-poof"></div><div class="mc-brillos">${brillos}</div><div class="mc-sienta">${m.sienta}</div></div>

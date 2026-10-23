@@ -183,7 +183,8 @@
   </svg>`;
 
   window.MASCOTAS_COPA = {
-    e1: { corre: AGUARA_CORRE, sienta: AGUARA_SIENTA, brisa: "#ffe2b8" },   // Aguará Guazú
+    // Aguará Guazú: dibujo hecho por la liga (imágenes en img/mascotas). Los dibujos de abajo quedan de respaldo.
+    e1: { img: true, corre: '<img src="img/mascotas/aguara-corre.png" alt="" draggable="false">', sienta: '<img src="img/mascotas/aguara-sienta.png" alt="" draggable="false">', brisa: "#ffd9a8" },
     e5: { corre: DOGO_CORRE, sienta: DOGO_SIENTA, brisa: "#cfe9ff" },       // Dogos F5
     e11: { corre: HUEMUL_CORRE, sienta: HUEMUL_SIENTA, brisa: "#f1e3c6" }   // Huemules
   };
