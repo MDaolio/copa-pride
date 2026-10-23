@@ -31,6 +31,9 @@ var MIN_PRUEBA = 240;         // duración de los PINs en una jornada de PRUEBA
 var COLS_PIN = 10;            // columnas de la hoja PINs
 var MINUTOS_BLOQUEO = 25;      // un partido tomado por un veedor queda reservado este tiempo
 var HORA_CIERRE_DEFAULT = "23:30";
+// Canal de YouTube de la Liga Pride (@LigaPride). La página toma de acá los videos de los partidos.
+var CANAL_YT = "UC4kxNF6MJQn0qBw55NNi2lA";
+var MIN_VIDEOS = 15;          // cada cuántos minutos se vuelve a mirar el canal
 
 /* Fixture (id, fecha, hora, cancha, encuentro). Sale de data.js; si cambian fechas u horarios de los playoffs, se vuelve a pegar. */
 var FIXTURE = [
@@ -89,6 +92,7 @@ function onOpen() {
     .addItem("Abrir jornada de PRUEBA (PINs sin horario)", "abrirJornadaPrueba")
     .addItem("Cerrar jornada", "cerrarJornada")
     .addItem("Liberar todos los partidos", "liberarBloqueos")
+    .addItem("Revisar videos de YouTube ahora", "revisarVideos")
     .addToUi();
 }
 
@@ -313,13 +317,44 @@ function publico_(r) {
   };
 }
 
+/* ---------------- videos de YouTube ----------------
+   Lee los últimos videos públicos del canal (el feed público de YouTube, sin claves) y se los pasa a la
+   página. La página reconoce a qué partido es cada video por los dos equipos que dice el título. */
+function videosYT_(forzar) {
+  var cache = CacheService.getScriptCache();
+  if (!forzar) { var hit = cache.get("videos"); if (hit) return JSON.parse(hit); }
+  var lista = [];
+  try {
+    var res = UrlFetchApp.fetch("https://www.youtube.com/feeds/videos.xml?channel_id=" + CANAL_YT, { muteHttpExceptions: true });
+    if (res.getResponseCode() === 200) {
+      var raiz = XmlService.parse(res.getContentText()).getRootElement();
+      var atom = XmlService.getNamespace("http://www.w3.org/2005/Atom");
+      var yt = XmlService.getNamespace("yt", "http://www.youtube.com/xml/schemas/2015");
+      raiz.getChildren("entry", atom).forEach(function (en) {
+        var id = en.getChildText("videoId", yt), t = en.getChildText("title", atom), f = en.getChildText("published", atom);
+        if (id && t) lista.push({ id: id, t: t, f: String(f || "").substring(0, 10) });
+      });
+    }
+    cache.put("videos", JSON.stringify(lista), MIN_VIDEOS * 60);
+  } catch (x) {
+    cache.put("videos", "[]", 120);   // si YouTube no responde, se reintenta en 2 minutos
+  }
+  return lista;
+}
+
+function revisarVideos() {
+  var v = videosYT_(true);
+  CacheService.getScriptCache().remove("estado");
+  SpreadsheetApp.getUi().alert(v.length ? ("Encontré " + v.length + " videos en el canal. El último: " + v[0].t) : "No encontré videos públicos en el canal todavía.");
+}
+
 function estadoJson_() {
   var cache = CacheService.getScriptCache();
   var hit = cache.get("estado");
   if (hit) return hit;
   var mapa = leerPartidos_(), out = {};
   for (var id in mapa) { if (mapa[id].estado) out[id] = publico_(mapa[id]); }
-  var json = JSON.stringify({ ok: true, partidos: out, ahora: ahora_().getTime() });
+  var json = JSON.stringify({ ok: true, partidos: out, videos: videosYT_(), ahora: ahora_().getTime() });
   cache.put("estado", json, 8);
   return json;
 }

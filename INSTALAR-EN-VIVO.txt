@@ -61,3 +61,11 @@ IMPORTANTE
 - Si cambiás Code.gs, hay que volver a implementar (Implementar > Administrar implementaciones > editar > Nueva versión). La dirección /exec NO cambia.
 - Si cambian fechas, horarios o equipos en data.js, avisame: hay que actualizar también la lista FIXTURE de Code.gs.
 - Seguridad: el PIN es una barrera práctica para que nadie modifique datos fuera de la jornada; no es seguridad bancaria.
+
+VIDEOS DE YOUTUBE (botón "Ver partido")
+- La planilla mira el canal @LigaPride cada 15 minutos y le pasa a la página los últimos videos públicos.
+- La página pone el botón "▶ Ver partido" en el partido cuyo título nombra a los DOS equipos, escritos como
+  en la página. Formato recomendado del título:  Copa Pride 2026 · Fecha 2 · Panteras FC vs Tigres
+  (Dogos puede ir como "Dogos" o "Dogos F5"; Yacares como "Yacares" o "Yacares BA").
+- El botón aparece solo cuando el partido ya terminó. Para probar en el momento: menú Copa Pride > Revisar videos de YouTube ahora.
+- Si un título salió mal, se puede cargar el link a mano en data.js, en el partido: video: "https://youtu.be/..."

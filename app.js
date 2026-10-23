@@ -372,6 +372,33 @@
   }
 
   /* Partido como renglón de planilla: hora y cancha a la izquierda, equipos apilados con su casillero de goles. */
+  /* Videos de YouTube: un video es de un partido si el título nombra a los dos equipos
+     (ej. "Copa Pride 2026 · Fecha 2 · Panteras FC vs Tigres"). Si se repite el cruce (zona y playoffs),
+     va al partido jugado más reciente antes de que se subiera el video. Un link cargado a mano (video: "...") manda. */
+  const normT = (s) => " " + String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " ";
+  const nombresDe = (e) => {
+    const base = normT(e.nombre).trim(), out = [base, ...(e.alias || []).map((x) => normT(x).trim())];
+    const sin = base.replace(/ (f5|ba)$/, "");
+    if (sin !== base) out.push(sin);
+    return out.filter(Boolean);
+  };
+  const nombra = (t, e) => e && nombresDe(e).some((n) => t.includes(" " + n + " "));
+  let videosMapa = {}, videosMapaKey = null;
+  function videoDe(p) {
+    if (p.video) return /^https?:/.test(p.video) ? p.video : "https://www.youtube.com/watch?v=" + p.video;
+    const clave = videosKey + "|" + partidos().filter(jugado).map((x) => x.id + x.local + x.visitante).join(",");
+    if (clave !== videosMapaKey) {
+      videosMapaKey = clave; videosMapa = {};
+      videosYT.slice().sort((a, b) => String(a.f).localeCompare(String(b.f))).forEach((v) => {
+        const t = normT(v.t);
+        const cand = partidos().filter((x) => jugado(x) && !x.video && !videosMapa[x.id] && x.fecha && (!v.f || x.fecha <= v.f) &&
+          nombra(t, equipo(x.local)) && nombra(t, equipo(x.visitante))).sort((a, b) => b.fecha.localeCompare(a.fecha));
+        if (cand[0]) videosMapa[cand[0].id] = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id);
+      });
+    }
+    return videosMapa[p.id] || "";
+  }
+
   function marcador(p, o) {
     o = o || {};
     const ok = jugado(p), live = enVivo(p), gan = ganadorId(p), pe = p.penales || {};
@@ -398,7 +425,8 @@
       pie += `<details${live ? " open" : ""}><summary>${res(p.local, p.golesLocal).replace('class="sm"', 'class="sm sm-l"')}<span class="chev">▾</span>${res(p.visitante, p.golesVisitante).replace('class="sm"', 'class="sm sm-v"')}</summary>${detalle(p)}</details>`;
     }
     if (p.mvp && jugador(p.mvp)) { const mj = jugador(p.mvp), me = equipo(mj.equipo); pie = `<p class="mvp">⭐ Jugador del partido: <a href="#/jugador/${esc(mj.id)}">${esc(mj.nombre)}</a>${me ? ` <small>${esc(me.nombre)}</small>` : ""}</p>` + pie; }
-    if (ok && o.detalle) pie += `<button type="button" class="comp" data-comp="${esc(p.id)}">Compartir resultado ↗</button>`;
+    const vid = ok ? videoDe(p) : "";
+    if (vid || (ok && o.detalle)) pie += `<div class="mt-acc">${vid ? `<a class="vid" href="${esc(vid)}" target="_blank" rel="noopener">▶ Ver partido</a>` : ""}${ok && o.detalle ? `<button type="button" class="comp" data-comp="${esc(p.id)}">Compartir resultado ↗</button>` : ""}</div>`;
     return `<article class="mt ${live ? "live" : ""} ${ok ? "fin" : ""}" data-id="${esc(p.id)}"><div class="mt-meta">${meta.join("")}</div><div class="mt-body">${fila(p.local, "l", p.golesLocal, pe.local)}${fila(p.visitante, "v", p.golesVisitante, pe.visitante)}</div><div class="mt-estado">${tag}<small>${esc(faseLabel(p))}</small></div>${pie ? `<div class="mt-pie">${pie}</div>` : ""}</article>`;
   }
   const tarjetaResultado = (p) => marcador(p, { detalle: true, veedor: true });
@@ -1092,10 +1120,12 @@
   /* ---------------- resultados en vivo (Google Sheets) ---------------- */
   const num = (v) => (v === "" || v == null ? null : Number(v));
   let remotoListo = false;   // la primera lectura no festeja goles viejos
+  let videosYT = [], videosKey = "";   // videos del canal de YouTube (llegan con los resultados en vivo)
   const golesNuevos = [];
   function aplicarRemoto(r) {
     if (!r || !r.partidos) return false;
     let cambio = false;
+    if (Array.isArray(r.videos)) { const k = JSON.stringify(r.videos); if (k !== videosKey) { videosKey = k; videosYT = r.videos; cambio = true; } }
     partidos().forEach((p) => {
       const x = r.partidos[p.id];
       if (!x || !x.estado) return;

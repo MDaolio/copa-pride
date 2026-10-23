@@ -805,3 +805,9 @@ html{scrollbar-width:thin;scrollbar-color:#3a352e #0b0a09}
 .r-3ro .res-top span{color:var(--tinta-2)}
 .rcol.r-semi .rcruces,.rcol.r-ult .rcruces{grid-template-columns:minmax(0,1fr);width:100%}
 .rcol.r-semi .rcruces>*,.r-fin,.r-fin>*{width:100%;justify-self:stretch;box-sizing:border-box}
+
+/* Botón "Ver partido" (video de YouTube) */
+.mt-acc{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.4rem 0 .1rem}
+.mt-acc .comp{margin:0}
+.vid{display:inline-flex;align-items:center;gap:.35rem;background:var(--oro-t);color:#111;border-radius:999px;padding:.38rem 1rem;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+.vid:hover{background:#f3d27e}
