@@ -16,7 +16,8 @@
  *    partidos, sin horario, y puede reabrir partidos finalizados para corregirlos.
  *  - Un partido solo lo puede tener un dispositivo a la vez (si otro quiere tomarlo,
  *    la pantalla le pregunta y el primero deja de poder cargar).
- *  - Los PINs sirven solo hoy y se anulan al cerrar la jornada o a la medianoche.
+ *  - La jornada se puede abrir la noche anterior: los PINs valen el día de los partidos (el de ADMIN ya sirve para probar
+ *    desde que se abre) y se anulan al cerrar la jornada o al terminar ese día.
  */
 
 var ZONA_HORARIA = "America/Argentina/Buenos_Aires";
@@ -139,7 +140,8 @@ function abrir_(prueba) {
   var hp = hoja_(HOJA_PINS);
   if (hp.getLastRow() > 1) hp.getRange(2, 1, hp.getLastRow() - 1, COLS_PIN).clearContent();
   hp.getRange(2, 1, filas.length, COLS_PIN).setNumberFormat("@").setValues(filas);
-  escribirConfig_({ pin: "", fecha: hoy_(), abierta: "SI" });
+  // Se guarda la fecha DE LOS PARTIDOS (no la de hoy): así se puede dejar abierta la noche anterior.
+  escribirConfig_({ pin: "", fecha: fecha, abierta: "SI" });
   limpiarCache_();
   ui.alert(prueba ? "Jornada de PRUEBA abierta" : "Jornada abierta",
     "PIN DE ADMINISTRACIÓN (solo para vos, entra a todos los partidos y puede corregir): " + pinAdmin +
@@ -275,8 +277,13 @@ function validar_(pin) {
   var c = leerConfig_();
   if (String(c.abierta || "").toUpperCase() !== "SI")
     return { ok: false, codigo: "cerrada", error: "La jornada está cerrada. La organización tiene que abrirla." };
-  if (c.fecha !== hoy_())
-    return { ok: false, codigo: "fecha", error: "La jornada de hoy no está abierta." };
+  // El día de los partidos entran todos. Antes de ese día (la noche anterior) solo entra el PIN de administración, para probar.
+  var hitAntes = null;
+  if (c.fecha !== hoy_()) {
+    hitAntes = pin ? buscarPin_(String(pin).trim()) : null;
+    if (!(hitAntes && hitAntes.partido === "*" && hoy_() < c.fecha))
+      return { ok: false, codigo: "fecha", error: c.fecha > hoy_() ? "La jornada es el " + c.fecha + ". Tu PIN se activa ese día, a la hora de tu partido." : "La jornada de hoy no está abierta." };
+  }
   var cierre = c.horaCierre || HORA_CIERRE_DEFAULT;
   if (hora_() > cierre)
     return { ok: false, codigo: "hora", error: "La jornada ya cerró (" + cierre + ")." };
