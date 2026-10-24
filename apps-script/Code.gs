@@ -27,7 +27,7 @@ var HOJA_PINS = "PINs";
 var COLUMNAS = ["id", "estado", "golesLocal", "golesVisitante", "penLocal", "penVisitante",
                 "goles", "tarjetas", "veedor", "lockHasta", "actualizado", "veedorEq", "disp", "mvp"];
 var MIN_ANTES = 10;           // el PIN de un partido se activa tantos minutos antes de su hora
-var MIN_DESPUES = 60;         // y vence tantos minutos después de su hora de inicio
+var MIN_DESPUES = 80;         // y vence tantos minutos después de su hora de inicio (14:00 -> 15:20)
 var MIN_PRUEBA = 240;         // duración de los PINs en una jornada de PRUEBA
 var COLS_PIN = 10;            // columnas de la hoja PINs
 var MINUTOS_BLOQUEO = 25;      // un partido tomado por un veedor queda reservado este tiempo
@@ -260,6 +260,7 @@ function buscarPin_(pin) {
     var p = String(vals[i][5]).trim();
     if (p && p === pin)
       return { partido: String(vals[i][0]), fecha: String(vals[i][1]), encuentro: String(vals[i][4]), fila: i + 2,
+               hora: vals[i][2] instanceof Date ? Utilities.formatDate(vals[i][2], ZONA_HORARIA, "HH:mm") : String(vals[i][2] || "").trim(),
                desde: String(vals[i][7] || ""), hasta: String(vals[i][8] || ""), estado: String(vals[i][9] || "") };
   }
   return null;
@@ -299,8 +300,15 @@ function validar_(pin) {
   var t = ahora_().getTime();
   if (hit.desde && t < aMs_(hit.desde))
     return { ok: false, codigo: "pin", error: "Todavía no es el horario de tu partido. Tu PIN se activa a las " + horaDe_(hit.desde) + "." };
-  if (hit.hasta && t > aMs_(hit.hasta))
-    return { ok: false, codigo: "pin", error: "El PIN de tu partido venció a las " + horaDe_(hit.hasta) + ". Avisale a la organización." };
+  // El vencimiento se calcula con la hora del partido y MIN_DESPUES (así un cambio de minutos vale también para PINs ya creados).
+  // Si la hoja dice más tarde (jornada de PRUEBA), se respeta la hoja.
+  var hastaMs = hit.hasta ? aMs_(hit.hasta) : 0;
+  if (/^\d{2}:\d{2}$/.test(hit.hora) && /^\d{4}-\d{2}-\d{2}$/.test(hit.fecha)) {
+    var porHora = aMs_(hit.fecha + " " + hit.hora) + MIN_DESPUES * 60000;
+    hastaMs = Math.max(hastaMs, porHora);
+  }
+  if (hastaMs && t > hastaMs)
+    return { ok: false, codigo: "pin", error: "El PIN de tu partido venció a las " + horaDe_(fmtFechaHora_(hastaMs)) + ". Avisale a la organización." };
   return { ok: true, partido: hit.partido, fecha: hit.fecha, encuentro: hit.encuentro, fila: hit.fila };
 }
 
