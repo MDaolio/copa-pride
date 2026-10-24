@@ -506,17 +506,32 @@
   }
 
   /* Cinta de resultados (arriba de todo) */
+  /* Cinta de arriba: muestra UNA sola fecha.
+     - Desde el día anterior a una fecha (el viernes) y durante ese día: los partidos de esa fecha (hora, en vivo, final).
+     - El resto de la semana: los resultados de la última fecha jugada, hasta el viernes siguiente. */
+  function fechaCinta() {
+    const hoy = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);   // Argentina (UTC-3)
+    const man = new Date(Date.now() - 3 * 3600e3 + 86400e3).toISOString().slice(0, 10);
+    const dias = [...new Set(partidos().map((p) => p.fecha).filter(Boolean))].sort();
+    const prox = dias.find((d) => d >= hoy);
+    if (prox && (prox === hoy || prox === man)) return prox;
+    const pasadas = dias.filter((d) => d < hoy);
+    return pasadas.length ? pasadas[pasadas.length - 1] : prox || "";
+  }
   function cintaHtml() {
-    const ps = partidos();
+    const dia = fechaCinta();
+    const ps = partidos().filter((p) => p.fecha === dia || enVivo(p)).sort((a, b) => porFecha(a, b) || natural(a.cancha, b.cancha));
     const nom = (id) => { const e = equipo(id); return esc(e ? e.nombre : (resolverSlot(id).texto || "?")); };
     const it = [];
-    ps.filter(enVivo).sort(porFecha).forEach((p) => it.push(`<span class="tk"><i class="tk-t vivo">EN VIVO</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`));
-    ps.filter(jugado).sort(porFecha).reverse().slice(0, 10).forEach((p) => it.push(`<span class="tk"><i class="tk-t">FINAL</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`));
-    ps.filter((p) => !jugado(p) && !enVivo(p)).sort(porFecha).slice(0, 4).forEach((p) => it.push(`<span class="tk"><i class="tk-t pr">${esc(fechaCorta(p.fecha))} ${esc(p.hora)}</i>${nom(p.local)} vs ${nom(p.visitante)}</span>`));
+    ps.filter(enVivo).forEach((p) => it.push(`<span class="tk"><i class="tk-t vivo">EN VIVO</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`));
+    ps.filter((p) => !enVivo(p)).forEach((p) => it.push(jugado(p)
+      ? `<span class="tk"><i class="tk-t">FINAL</i>${nom(p.local)} <b>${p.golesLocal}</b>–<b>${p.golesVisitante}</b> ${nom(p.visitante)}</span>`
+      : `<span class="tk"><i class="tk-t pr">${esc(fechaCorta(p.fecha))} ${esc(p.hora)}</i>${nom(p.local)} vs ${nom(p.visitante)}</span>`));
     if (!it.length) return "";
     const h = it.join("");
     return `<div class="tk-track" style="--d:${Math.max(30, it.length * 5)}s">${h}${h}</div>`;
   }
+
 
   /* Seguí a tu equipo: se guarda en el celu de cada uno (no es un dato de la liga). */
   function miEquipoId() { try { return localStorage.getItem("copaMiEq") || ""; } catch (e) { return ""; } }
