@@ -338,29 +338,45 @@ function publico_(r) {
 function videosYT_(forzar) {
   var cache = CacheService.getScriptCache();
   if (!forzar) { var hit = cache.get("videos"); if (hit) return JSON.parse(hit); }
-  var lista = [];
+  var lista = [], motivo = "";
+  // 1) Conexión oficial (servicio "YouTube Data API" agregado en Apps Script > Servicios). Es la más confiable.
   try {
-    var res = UrlFetchApp.fetch("https://www.youtube.com/feeds/videos.xml?channel_id=" + CANAL_YT, { muteHttpExceptions: true });
-    if (res.getResponseCode() === 200) {
-      var raiz = XmlService.parse(res.getContentText()).getRootElement();
-      var atom = XmlService.getNamespace("http://www.w3.org/2005/Atom");
-      var yt = XmlService.getNamespace("yt", "http://www.youtube.com/xml/schemas/2015");
-      raiz.getChildren("entry", atom).forEach(function (en) {
-        var id = en.getChildText("videoId", yt), t = en.getChildText("title", atom), f = en.getChildText("published", atom);
-        if (id && t) lista.push({ id: id, t: t, f: String(f || "").substring(0, 10) });
+    if (typeof YouTube !== "undefined") {
+      var r = YouTube.PlaylistItems.list("snippet", { playlistId: "UU" + CANAL_YT.substring(2), maxResults: 50 });
+      (r.items || []).forEach(function (it) {
+        var s = it.snippet || {}, id = s.resourceId && s.resourceId.videoId;
+        if (id && s.title && s.title !== "Private video" && s.title !== "Deleted video") lista.push({ id: id, t: s.title, f: String(s.publishedAt || "").substring(0, 10) });
       });
+      motivo = "conexión oficial de YouTube";
     }
-    cache.put("videos", JSON.stringify(lista), MIN_VIDEOS * 60);
-  } catch (x) {
-    cache.put("videos", "[]", 120);   // si YouTube no responde, se reintenta en 2 minutos
+  } catch (x) { motivo = "falló la conexión oficial (" + x + ")"; lista = []; }
+  // 2) Respaldo: el listado público del canal.
+  if (!lista.length) {
+    try {
+      var res = UrlFetchApp.fetch("https://www.youtube.com/feeds/videos.xml?channel_id=" + CANAL_YT, { muteHttpExceptions: true });
+      var cod = res.getResponseCode();
+      if (cod === 200) {
+        var raiz = XmlService.parse(res.getContentText()).getRootElement();
+        var atom = XmlService.getNamespace("http://www.w3.org/2005/Atom");
+        var yt = XmlService.getNamespace("yt", "http://www.youtube.com/xml/schemas/2015");
+        raiz.getChildren("entry", atom).forEach(function (en) {
+          var id = en.getChildText("videoId", yt), t = en.getChildText("title", atom), f = en.getChildText("published", atom);
+          if (id && t) lista.push({ id: id, t: t, f: String(f || "").substring(0, 10) });
+        });
+        motivo = (motivo ? motivo + "; " : "") + "listado público";
+      } else motivo = (motivo ? motivo + "; " : "") + "el listado público respondió " + cod;
+    } catch (x2) { motivo = (motivo ? motivo + "; " : "") + "no se pudo leer el listado público"; }
   }
+  cache.put("videos", JSON.stringify(lista), lista.length ? MIN_VIDEOS * 60 : 120);   // si no hay nada, se reintenta en 2 minutos
+  cache.put("videosMotivo", motivo, 3600);
   return lista;
 }
 
 function revisarVideos() {
-  var v = videosYT_(true);
+  var v = videosYT_(true), motivo = CacheService.getScriptCache().get("videosMotivo") || "";
   CacheService.getScriptCache().remove("estado");
-  SpreadsheetApp.getUi().alert(v.length ? ("Encontré " + v.length + " videos en el canal. El último: " + v[0].t) : "No encontré videos públicos en el canal todavía.");
+  SpreadsheetApp.getUi().alert(v.length ? ("Encontré " + v.length + " videos en el canal (" + motivo + "). El último: " + v[0].t)
+    : ("No encontré videos en el canal. Detalle: " + motivo + "."));
 }
 
 function estadoJson_() {
